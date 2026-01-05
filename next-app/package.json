@@ -1,0 +1,29 @@
+{
+  "name": "next-app",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@helcor/window-sizes": "^1.0.0-beta.9",
+    "animejs": "^3.2.2",
+    "classnames": "^2.5.1",
+    "hoist-non-react-statics": "^3.3.2",
+    "howler": "^2.2.4",
+    "next": "16.1.1",
+    "polished": "^4.3.1",
+    "prop-types": "^15.8.1",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "react-helmet": "^6.1.0",
+    "react-jss": "^10.10.0"
+  },
+  "devDependencies": {
+    "eslint": "^9",
+    "eslint-config-next": "16.1.1"
+  }
+}
