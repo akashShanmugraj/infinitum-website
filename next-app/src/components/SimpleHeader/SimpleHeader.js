@@ -28,7 +28,7 @@ export default function SimpleHeader() {
                         alt="PSG Logo"
                         height={80}
                         width={80}
-                        style={{ width: '80px', height: '80px', marginTop: '20px' }}
+                        style={{ width: '80px', height: '80px', marginTop: '20px'}}
                         className={styles.orgLogo}
                     />
                     <Image

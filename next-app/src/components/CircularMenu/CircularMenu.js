@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import styles from './CircularMenu.module.css';
@@ -16,32 +16,9 @@ const MENU_ITEMS = [
 
 export default function CircularMenu() {
     const [isOpen, setIsOpen] = useState(false);
-    const [activeIndex, setActiveIndex] = useState(0); // Start with Home
+    const [activeIndex, setActiveIndex] = useState(0);
+    const [hoveredLabel, setHoveredLabel] = useState(null);
     const pathname = usePathname();
-
-    // Audio refs
-    const expandSoundRef = useRef(null);
-    const clickSoundRef = useRef(null);
-
-    // Initialize audio on mount
-    useEffect(() => {
-        expandSoundRef.current = new Audio('/sounds/expand.mp3');
-        clickSoundRef.current = new Audio('/sounds/click.mp3');
-
-        // Set volume
-        expandSoundRef.current.volume = 0.5;
-        clickSoundRef.current.volume = 0.5;
-    }, []);
-
-    // Play sound helper
-    const playSound = useCallback((audioRef) => {
-        if (audioRef.current) {
-            audioRef.current.currentTime = 0;
-            audioRef.current.play().catch(() => {
-                // Ignore autoplay errors
-            });
-        }
-    }, []);
 
     useEffect(() => {
         const index = MENU_ITEMS.findIndex(item => item.href === pathname);
@@ -51,17 +28,11 @@ export default function CircularMenu() {
     }, [pathname]);
 
     const toggleMenu = () => {
-        if (!isOpen) {
-            playSound(expandSoundRef);
-        } else {
-            playSound(clickSoundRef);
-        }
         setIsOpen(!isOpen);
         setHoveredLabel(null);
     };
 
     const handleItemClick = (index) => {
-        playSound(clickSoundRef);
         setActiveIndex(index);
         setTimeout(() => {
             setIsOpen(false);
@@ -120,4 +91,3 @@ export default function CircularMenu() {
         </nav>
     );
 }
-
