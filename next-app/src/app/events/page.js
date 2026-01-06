@@ -226,13 +226,13 @@ class Events extends React.Component {
 
     handleSelectEvent = (index, direction = 'none') => {
         const { events } = this.state;
-        this.setState({
-            selectedIndex: index,
-            slideDirection: direction
-        });
+
+        this.setState({ selectedIndex: index, slideDirection: direction });
+        
         if (events[index]) {
             this.fetchEventDetails(events[index].eventId);
         }
+
         // Reset slide direction after animation
         setTimeout(() => {
             this.setState({ slideDirection: 'none' });
@@ -260,7 +260,7 @@ class Events extends React.Component {
             loading,
             detailsLoading,
             error,
-            slideDirection
+            slideDirection,
         } = this.state;
 
         if (loading) {

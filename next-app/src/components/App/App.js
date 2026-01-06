@@ -8,7 +8,7 @@ import { Header } from '../Header';
 import { Footer } from '../Footer';
 
 class Component extends React.Component {
-  static displayName = 'Header';
+  static displayName = 'App';
 
   static propTypes = {
     theme: PropTypes.object.isRequired,

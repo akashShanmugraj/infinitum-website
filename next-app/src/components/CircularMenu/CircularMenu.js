@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
+import { Howl } from 'howler';
 import styles from './CircularMenu.module.css';
 
 const MENU_ITEMS = [
@@ -13,12 +14,28 @@ const MENU_ITEMS = [
     { label: 'News', icon: 'ri-newspaper-line', href: '/news' },
 ];
 
+// Sound effects
+let rotateSound = null;
+let openSound = null;
+
+if (typeof window !== 'undefined') {
+    rotateSound = new Howl({
+        src: ['/sounds/deploy.mp3'],
+        volume: 0.3,
+    });
+    openSound = new Howl({
+        src: ['/sounds/expand.mp3'],
+        volume: 0.25,
+    });
+}
+
 export default function CircularMenu() {
     const [isOpen, setIsOpen] = useState(false);
     const [activeIndex, setActiveIndex] = useState(0);
     const [hoveredIndex, setHoveredIndex] = useState(null);
     const [mouseAngle, setMouseAngle] = useState(null);
     const [isMounted, setIsMounted] = useState(false);
+    const [rotationAngle, setRotationAngle] = useState(0); // Track actual rotation
     const pathname = usePathname();
     const router = useRouter();
     const menuRef = useRef(null);
@@ -34,6 +51,9 @@ export default function CircularMenu() {
         const index = MENU_ITEMS.findIndex(item => item.href === pathname);
         if (index !== -1) {
             setActiveIndex(index);
+            // Set initial rotation based on current page
+            const segmentAngle = 360 / MENU_ITEMS.length;
+            setRotationAngle(-index * segmentAngle);
         }
     }, [pathname, isMounted]);
 
@@ -64,17 +84,17 @@ export default function CircularMenu() {
             if (angle < 0) angle += 360;
             setMouseAngle(angle);
             
-            // Determine which segment the mouse is in, accounting for rotation
+            // Determine which segment the mouse is in
             const segmentAngle = 360 / MENU_ITEMS.length;
-            const rotationOffset = activeIndex * segmentAngle; // Reverse the visual offset
-            const adjustedAngle = (angle + rotationOffset + segmentAngle / 2) % 360;
+            // Account for current rotation
+            const adjustedAngle = (angle - rotationAngle + segmentAngle / 2 + 360) % 360;
             const segmentIndex = Math.floor(adjustedAngle / segmentAngle);
-            setHoveredIndex(segmentIndex);
+            setHoveredIndex(segmentIndex % MENU_ITEMS.length);
         } else if (distance <= 50) {
             setHoveredIndex(null);
             setMouseAngle(null);
         }
-    }, [isOpen, activeIndex]);
+    }, [isOpen, rotationAngle]);
 
     useEffect(() => {
         if (isOpen) {
@@ -84,6 +104,9 @@ export default function CircularMenu() {
     }, [isOpen, handleMouseMove]);
 
     const toggleMenu = () => {
+        if (!isOpen && openSound) {
+            openSound.play();
+        }
         setIsOpen(!isOpen);
         setHoveredIndex(null);
         setMouseAngle(null);
@@ -94,7 +117,17 @@ export default function CircularMenu() {
         
         const targetHref = MENU_ITEMS[index].href;
         
-        // Update active index for visual rotation
+        // Calculate new rotation to bring clicked item to top
+        const segmentAngle = 360 / MENU_ITEMS.length;
+        const newRotation = -index * segmentAngle;
+        
+        // Play rotation sound
+        if (rotateSound && newRotation !== rotationAngle) {
+            rotateSound.play();
+        }
+        
+        // Animate rotation
+        setRotationAngle(newRotation);
         setActiveIndex(index);
         
         // Wait for rotation animation, then navigate and close
@@ -102,17 +135,15 @@ export default function CircularMenu() {
             router.push(targetHref);
             setIsOpen(false);
             setHoveredIndex(null);
-        }, 400);
+        }, 500);
     };
 
-    // Calculate position for each segment's icon WITH rotation offset
+    // Calculate position for each segment's icon (no rotation offset - handled by CSS)
     const getIconPosition = (index) => {
         const total = MENU_ITEMS.length;
         const segmentAngle = 360 / total;
-        // Apply rotation so active item is always at top (index 0 position)
-        const rotationOffset = -activeIndex * segmentAngle;
-        const angle = index * segmentAngle + rotationOffset; // 0 = top
-        const radius = 100; // Distance from center to icon
+        const angle = index * segmentAngle; // 0 = top
+        const radius = 105; // Distance from center to icon
         
         const rad = (angle - 90) * (Math.PI / 180);
         const x = Math.cos(rad) * radius;
@@ -121,16 +152,14 @@ export default function CircularMenu() {
         return { x, y, angle };
     };
 
-    // Generate SVG path for a pie segment WITH rotation offset
+    // Generate SVG path for a pie segment (no rotation offset - handled by CSS)
     const getSegmentPath = (index) => {
         const total = MENU_ITEMS.length;
         const segmentAngle = 360 / total;
-        // Apply rotation so active item is always at top
-        const rotationOffset = -activeIndex * segmentAngle;
-        const startAngle = index * segmentAngle - segmentAngle / 2 - 90 + rotationOffset;
+        const startAngle = index * segmentAngle - segmentAngle / 2 - 90;
         const endAngle = startAngle + segmentAngle;
         
-        const innerRadius = 45;
+        const innerRadius = 50;
         const outerRadius = 150;
         
         const startRad = startAngle * (Math.PI / 180);
@@ -163,63 +192,68 @@ export default function CircularMenu() {
             {/* Pie Menu - only render after mount to avoid hydration mismatch */}
             {isMounted && (
                 <div className={styles.pieMenu}>
-                    <svg 
-                        viewBox="-160 -160 320 320" 
-                        className={styles.pieSvg}
+                    {/* Rotating container for segments and icons */}
+                    <div 
+                        className={styles.rotatingContainer}
+                        style={{ transform: `rotate(${rotationAngle}deg)` }}
                     >
-                        {/* Segment backgrounds */}
+                        <svg 
+                            viewBox="-160 -160 320 320" 
+                            className={styles.pieSvg}
+                        >
+                            {/* Segment backgrounds */}
+                            {MENU_ITEMS.map((item, index) => {
+                                const isHovered = hoveredIndex === index;
+                                const isActive = activeIndex === index;
+                                
+                                return (
+                                    <g key={index}>
+                                        {/* Segment path */}
+                                        <path
+                                            d={getSegmentPath(index)}
+                                            className={`${styles.segment} ${isHovered ? styles.segmentHovered : ''} ${isActive ? styles.segmentActive : ''}`}
+                                            onClick={(e) => handleItemClick(e, index)}
+                                        />
+                                        
+                                        {/* Segment border */}
+                                        <path
+                                            d={getSegmentPath(index)}
+                                            className={styles.segmentBorder}
+                                        />
+                                    </g>
+                                );
+                            })}
+                        </svg>
+
+                        {/* Icons positioned on segments */}
                         {MENU_ITEMS.map((item, index) => {
+                            const pos = getIconPosition(index);
                             const isHovered = hoveredIndex === index;
                             const isActive = activeIndex === index;
                             
                             return (
-                                <g key={index}>
-                                    {/* Segment path */}
-                                    <path
-                                        d={getSegmentPath(index)}
-                                        className={`${styles.segment} ${isHovered ? styles.segmentHovered : ''} ${isActive ? styles.segmentActive : ''}`}
-                                        onClick={(e) => handleItemClick(e, index)}
-                                    />
-                                    
-                                    {/* Segment border */}
-                                    <path
-                                        d={getSegmentPath(index)}
-                                        className={styles.segmentBorder}
-                                    />
-                                </g>
+                                <a
+                                    key={index}
+                                    href={item.href}
+                                    className={`${styles.segmentIcon} ${isHovered ? styles.iconHovered : ''} ${isActive ? styles.iconActive : ''}`}
+                                    style={{
+                                        '--x': `${pos.x}px`,
+                                        '--y': `${pos.y}px`,
+                                        // Counter-rotate icons so they stay upright
+                                        '--counter-rotate': `${-rotationAngle}deg`,
+                                    }}
+                                    onClick={(e) => handleItemClick(e, index)}
+                                >
+                                    <i className={item.icon}></i>
+                                    <span className={styles.iconLabel}>{item.label}</span>
+                                </a>
                             );
                         })}
-                    </svg>
+                    </div>
 
-                    {/* Icons positioned on segments */}
-                    {MENU_ITEMS.map((item, index) => {
-                        const pos = getIconPosition(index);
-                        const isHovered = hoveredIndex === index;
-                        const isActive = activeIndex === index;
-                        
-                        return (
-                            <a
-                                key={index}
-                                href={item.href}
-                                className={`${styles.segmentIcon} ${isHovered ? styles.iconHovered : ''} ${isActive ? styles.iconActive : ''}`}
-                                style={{
-                                    '--x': `${pos.x}px`,
-                                    '--y': `${pos.y}px`,
-                                }}
-                                onClick={(e) => handleItemClick(e, index)}
-                            >
-                                <i className={item.icon}></i>
-                                <span className={styles.iconLabel}>{item.label}</span>
-                            </a>
-                        );
-                    })}
-
-                    {/* Center circle with close button */}
+                    {/* Center circle with close button only */}
                     <button className={styles.centerCircle} onClick={() => setIsOpen(false)}>
                         <i className="ri-close-line" style={{ fontSize: 28, color: '#c72071' }}></i>
-                        {hoveredIndex !== null && (
-                            <span className={styles.centerLabel}>{MENU_ITEMS[hoveredIndex].label}</span>
-                        )}
                     </button>
                 </div>
             )}

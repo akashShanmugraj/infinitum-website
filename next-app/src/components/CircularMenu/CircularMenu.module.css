@@ -102,6 +102,14 @@
     pointer-events: auto;
 }
 
+/* Rotating container for segments and icons */
+.rotatingContainer {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
 .pieSvg {
     width: 100%;
     height: 100%;
@@ -140,24 +148,25 @@
     height: 44px;
     margin-left: -22px;
     margin-top: -22px;
-    transform: translate(var(--x), var(--y));
+    transform: translate(var(--x), var(--y)) rotate(var(--counter-rotate, 0deg));
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     color: var(--white-color);
-    font-size: 22px;
+    font-size: 20px;
     text-decoration: none;
     background: rgba(20, 20, 25, 0.9);
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 50%;
-    transition: all 0.25s ease;
+    transition: all 0.25s ease, transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
     z-index: 10;
 }
 
 .segmentIcon:hover,
 .iconHovered {
     background: var(--primary-color);
-    transform: translate(var(--x), var(--y)) scale(1.15);
+    transform: translate(var(--x), var(--y)) rotate(var(--counter-rotate, 0deg)) scale(1.15);
     border-color: var(--primary-color);
 }
 
@@ -166,19 +175,18 @@
     border-color: #fff;
 }
 
-/* Center Circle - Close Button */
+/* Center Circle - Close Button Only */
 .centerCircle {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 80px;
-    height: 80px;
+    width: 90px;
+    height: 90px;
     background: linear-gradient(135deg, #151518, #1f1f25);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(199, 32, 113, 0.5);
     border-radius: 50%;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
     z-index: 20;
@@ -194,56 +202,64 @@
     transform: translate(-50%, -50%) scale(1.05);
 }
 
-.centerLabel {
-    font-size: 9px;
-    font-weight: 700;
-    text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.7);
-    text-align: center;
-    letter-spacing: 1px;
-    margin-top: 2px;
-}
-
-/* Icon Labels - hidden by default on desktop */
+/* Icon Labels - always visible on segments */
 .iconLabel {
-    display: none;
     position: absolute;
     top: 100%;
     left: 50%;
     transform: translateX(-50%);
-    margin-top: 4px;
+    margin-top: 6px;
     font-size: 9px;
-    font-weight: 600;
+    font-weight: 700;
     text-transform: uppercase;
     color: var(--white-color);
     white-space: nowrap;
     letter-spacing: 1px;
     text-shadow: 0 1px 3px rgba(0,0,0,0.8);
     pointer-events: none;
+    opacity: 0.85;
 }
 
 /* Mobile Adjustments */
 @media (max-width: 768px) {
+    .navContainer {
+        left: 12px;
+        top: 12px;
+    }
+
+    .toggleBtn {
+        width: 44px;
+        height: 44px;
+    }
+
+    .toggleBtn i {
+        font-size: 20px;
+    }
+
     .pieMenu {
-        width: 320px;
-        height: 320px;
+        width: 300px;
+        height: 300px;
     }
     
     .segmentIcon {
-        width: 36px;
-        height: 36px;
-        margin-left: -18px;
-        margin-top: -18px;
+        width: 38px;
+        height: 38px;
+        margin-left: -19px;
+        margin-top: -19px;
         font-size: 16px;
     }
-    
-    /* Show labels on mobile */
+
     .iconLabel {
-        display: block;
+        font-size: 8px;
+        margin-top: 4px;
     }
     
     .centerCircle {
-        width: 70px;
-        height: 70px;
+        width: 75px;
+        height: 75px;
+    }
+
+    .centerCircle i {
+        font-size: 24px !important;
     }
 }
