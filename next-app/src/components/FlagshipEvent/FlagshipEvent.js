@@ -79,7 +79,7 @@ export default function FlagshipEvent() {
                     }
 
                     setThooral(eventDetails);
-                    console.log('Thooral Details:', eventDetails);
+                    // console.log('Thooral Details:', eventDetails);
                 }
             } catch (err) {
                 console.error('Error fetching flagship event:', err);
