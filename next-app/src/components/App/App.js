@@ -24,7 +24,7 @@ function AppWithShutter({ classes, className, children, ...etc }) {
   }, []);
 
   // Only show footer on home route
-  const showFooter = pathname === '/';
+  const showFooter = true;
 
   return (
     <div className={cx(classes.root, className)} {...etc}>
