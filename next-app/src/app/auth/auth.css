@@ -93,6 +93,276 @@ main>div {
 }
 
 /* ============================================
+   MAIN FRAME - Parallelogram Container (Login)
+   ============================================ */
+.main-frame {
+    position: relative;
+    width: 480px;
+    height: 440px;
+    background: var(--bg-grey);
+    clip-path: polygon(35px 0%, 100% 0%, calc(100% - 35px) 100%, 0% 100%);
+    box-shadow: 0 0 40px rgba(199, 32, 113, 0.2);
+}
+
+.main-frame::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--frame-color), var(--accent-color));
+    clip-path: polygon(35px 0%, 100% 0%, calc(100% - 35px) 100%, 0% 100%);
+    -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    padding: 3px;
+    z-index: 1;
+}
+
+.inner-frame {
+    position: absolute;
+    top: 12px;
+    left: 18px;
+    right: 18px;
+    bottom: 12px;
+    border: 2px solid rgba(199, 32, 113, 0.5);
+    clip-path: polygon(28px 0%, 100% 0%, calc(100% - 28px) 100%, 0% 100%);
+}
+
+/* Corner and Line Accents */
+.corner-accent-tl,
+.corner-accent-tr,
+.corner-accent-bl,
+.corner-accent-br {
+    position: absolute;
+    width: 50px;
+    height: 2px;
+    background: var(--frame-color);
+    box-shadow: 0 0 8px var(--frame-glow);
+    z-index: 5;
+}
+
+.corner-accent-tl {
+    top: 8px;
+    left: 45px;
+}
+
+.corner-accent-tr {
+    top: 8px;
+    right: 25px;
+}
+
+.corner-accent-bl {
+    bottom: 8px;
+    left: 25px;
+}
+
+.corner-accent-br {
+    bottom: 8px;
+    right: 45px;
+}
+
+.corner-accent-tl::after,
+.corner-accent-tr::after,
+.corner-accent-bl::after,
+.corner-accent-br::after {
+    content: '';
+    position: absolute;
+    width: 2px;
+    height: 18px;
+    background: var(--frame-color);
+}
+
+.corner-accent-tl::after {
+    top: 0;
+    right: -8px;
+}
+
+.corner-accent-tr::after {
+    top: 0;
+    left: -8px;
+}
+
+.corner-accent-bl::after {
+    bottom: 0;
+    right: -8px;
+}
+
+.corner-accent-br::after {
+    bottom: 0;
+    left: -8px;
+}
+
+.side-line-left {
+    position: absolute;
+    top: 60px;
+    left: 8px;
+    width: 2px;
+    height: 120px;
+    background: linear-gradient(to bottom, transparent, var(--frame-color), transparent);
+    z-index: 5;
+}
+
+.side-line-right {
+    position: absolute;
+    top: 100px;
+    right: 8px;
+    width: 2px;
+    height: 140px;
+    background: linear-gradient(to bottom, transparent, var(--frame-color), transparent);
+    z-index: 5;
+}
+
+.accent-bar-top {
+    position: absolute;
+    top: 35px;
+    left: 70px;
+    width: 25px;
+    height: 2px;
+    background: var(--frame-color);
+    opacity: 0.6;
+}
+
+.accent-bar-bottom {
+    position: absolute;
+    bottom: 35px;
+    right: 70px;
+    width: 25px;
+    height: 2px;
+    background: var(--frame-color);
+    opacity: 0.6;
+}
+
+/* Login Panel */
+.login-panel {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 320px;
+    padding: 0;
+    z-index: 10;
+}
+
+.login-title {
+    text-align: center;
+    color: #ffffff;
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: 5px;
+    margin-top: 22px;
+    margin-bottom: 28px;
+    text-shadow: 0 0 12px var(--frame-glow);
+    text-transform: uppercase;
+}
+
+/* Input Groups for Login */
+.input-group {
+    position: relative;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+}
+
+.input-group:last-of-type {
+    margin-bottom: 0;
+}
+
+.input-group .label {
+    position: absolute;
+    left: 14px;
+    color: var(--text-dim);
+    font-family: var(--font-orbitron), 'Orbitron', sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    pointer-events: none;
+}
+
+.input-group .icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    color: rgba(199, 32, 113, 0.7);
+    opacity: 0.8;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 14px 14px 14px 40px;
+    background: transparent;
+    border: none;
+    color: #ffffff;
+    font-family: var(--font-electrolize), 'Electrolize', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.05em;
+    outline: none;
+}
+
+.input-group input::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+}
+
+.input-group:focus-within {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 12px rgba(199, 32, 113, 0.25);
+}
+
+/* Floating Particles */
+.particle {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background: var(--frame-color);
+    border-radius: 50%;
+    opacity: 0.5;
+}
+
+.particle-1 {
+    top: 25%;
+    left: 15%;
+}
+
+.particle-2 {
+    top: 40%;
+    right: 12%;
+}
+
+.particle-3 {
+    bottom: 30%;
+    left: 10%;
+}
+
+.particle-4 {
+    bottom: 20%;
+    right: 18%;
+}
+
+.particle-5 {
+    top: 15%;
+    right: 30%;
+    width: 2px;
+    height: 2px;
+}
+
+.particle-6 {
+    bottom: 40%;
+    left: 25%;
+    width: 2px;
+    height: 2px;
+}
+
+/* ============================================
    REGISTRATION CARD (Simplified)
    ============================================ */
 .auth-card {
@@ -476,5 +746,65 @@ main>div {
     .auth-field select {
         padding: 10px 12px;
         font-size: 12px;
+    }
+}
+
+@media (max-width: 520px) {
+    .auth-page {
+        padding: 10px;
+    }
+
+    .auth-card,
+    .register-card {
+        padding: 20px 16px;
+    }
+
+    .auth-header h1 {
+        font-size: 16px;
+    }
+
+    .auth-field input,
+    .auth-field select {
+        padding: 10px 12px;
+        font-size: 12px;
+    }
+
+    /* Login Frame Responsive */
+    .main-frame {
+        width: 92%;
+        max-width: 380px;
+        height: auto;
+        min-height: 400px;
+        padding: 40px 20px;
+        clip-path: polygon(25px 0%, 100% 0%, calc(100% - 25px) 100%, 0% 100%);
+    }
+
+    .main-frame::before {
+        clip-path: polygon(25px 0%, 100% 0%, calc(100% - 25px) 100%, 0% 100%);
+    }
+
+    .inner-frame {
+        clip-path: polygon(20px 0%, 100% 0%, calc(100% - 20px) 100%, 0% 100%);
+    }
+
+    .login-panel {
+        position: relative;
+        top: auto;
+        left: auto;
+        transform: none;
+        width: 100%;
+        padding: 20px;
+    }
+
+    .corner-accent-tl,
+    .corner-accent-tr,
+    .corner-accent-bl,
+    .corner-accent-br,
+    .side-line-left,
+    .side-line-right,
+    .accent-bar-top,
+    .accent-bar-bottom,
+    .particle {
+        display: none;
     }
 }
