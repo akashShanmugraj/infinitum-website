@@ -317,48 +317,6 @@ class Component extends React.PureComponent {
     } = this.props;
     const { show, shapes } = this.state;
 
-    // Contact sections data
-    const contactSections = [
-      {
-        title: 'Heads',
-        contacts: [
-          { name: 'Arulkumara B R', position: 'Secretary', phone: '+91 XXXXX XXXXX' },
-          { name: 'Sanjay J', position: 'Joint Secretary', phone: '+91 XXXXX XXXXX' },
-          { name: 'Naren Siddharth M', position: 'Head-Sponsorship', phone: '+91 XXXXX XXXXX' }
-        ]
-      },
-      {
-        title: 'Tech Support',
-        contacts: [
-          { name: 'Darshan V G', phone: '+91 XXXXX XXXXX' },
-          { name: 'Adhish Krishna S', phone: '+91 XXXXX XXXXX' },
-          { name: 'Abinav P', phone: '+91 XXXXX XXXXX' }
-        ]
-      },
-      {
-        title: 'Event Support',
-        contacts: [
-          { name: 'Rohith Dharshan', phone: '+91 XXXXX XXXXX' },
-          { name: 'Shashwath', phone: '+91 XXXXX XXXXX' },
-          { name: 'Dinesh T M', phone: '+91 XXXXX XXXXX' }
-        ]
-      },
-      {
-        title: 'Accommodation (Boys)',
-        contacts: [
-          { name: 'Rohith Sarveshaa', phone: '+91 XXXXX XXXXX' },
-          { name: 'Karthick Saravanan', phone: '+91 XXXXX XXXXX' },
-        ]
-      },
-      {
-        title: 'Accommodation (Girls)',
-        contacts: [
-          { name: 'Kanishka', phone: '+91 XXXXX XXXXX' },
-          { name: 'Thejashree N', phone: '+91 XXXXX XXXXX' }
-        ]
-      }
-    ];
-
     return (
       <footer
         className={cx(classes.root, className)}
