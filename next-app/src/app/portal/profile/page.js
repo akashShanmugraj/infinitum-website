@@ -8,6 +8,55 @@ import api from '@/services/api'; // Add import for api
 
 import { withStyles } from '@/tools/withStyles';
 import { Secuence as SecuenceComponent } from '@/components/Secuence';
+import { Button } from '@/components/Button';
+
+// --- Mobile Quick Actions Component ---
+const MobileActions = ({ user, classes, onQrClick, onIdClick, onViewIdClick, isIdLoading, viewIdUrl, idToUpload }) => (
+    <div className={classes.mobileActionsContainer}>
+        {/* ID Verification Header */}
+        <h3 className={classes.panelHeader} style={{ marginBottom:10 }}>Identity Verification</h3>
+        
+        {/* QR Code */}
+        <div className={classes.qrContainer} onClick={onQrClick} style={{ justifyContent: 'center', marginTop: 10 }}>
+            <div className={classes.qrBox}>
+                <QRCodeSVG
+                    value={JSON.stringify({ type: "PARTICIPANT", id: user.uniqueId })}
+                    size={80}
+                />
+            </div>
+            <div className={classes.qrExpandHint} style={{textAlign: 'center'}}>
+                Tap to expand QR
+            </div>
+        </div>
+
+        {/* ID Verification Actions */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, marginTop: 15, width: '100%' }}>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap' }}>
+                {viewIdUrl && !idToUpload && (
+                    <button
+                        className={classes.actionBtn}
+                        onClick={onViewIdClick}
+                        disabled={isIdLoading}
+                    >
+                        {isIdLoading ? '...' : 'View ID'}
+                    </button>
+                )}
+                {!idToUpload && (
+                    <button
+                        className={classes.actionBtn}
+                        onClick={onIdClick}
+                    >
+                        {user.idCardUploaded ? 'Re-upload' : 'Upload'}
+                    </button>
+                )}
+            </div>
+             {user.idCardUploaded && !idToUpload && (
+                <div style={{ color: '#00ff64', fontSize: '0.7rem', marginTop: 2 }}>✓ ID Uploaded</div>
+            )}
+        </div>
+    </div>
+);
+
 
 // --- Identity Data Core (Three.js Version) ---
 class IdentityNode extends React.Component {
@@ -171,7 +220,7 @@ class IdentityNode extends React.Component {
     }
 
     render() {
-        const { user } = this.props;
+        const { user, isMobile } = this.props;
         // Text overlay styles
         const overlayStyle = {
             position: 'absolute', 
@@ -187,14 +236,16 @@ class IdentityNode extends React.Component {
         return (
             <div style={{ position: 'relative', width: '100%', height: '100%' }}>
                 {/* Status Overlay */}
-                <div style={overlayStyle}>
-                    <div style={{ color: statusColor, fontWeight: 'bold', fontSize: '0.9rem' }}>
-                        STATUS: {user.generalFeePaid ? 'ONLINE' : 'RESTRICTED'}
+                {!isMobile && (
+                    <div style={overlayStyle}>
+                        <div style={{ color: statusColor, fontWeight: 'bold', fontSize: '0.9rem' }}>
+                            STATUS: {user.generalFeePaid ? 'ONLINE' : 'RESTRICTED'}
+                        </div>
+                        <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.75rem', marginTop: 4 }}>
+                            LEVEL {user.year || 1} // {user.isPSGStudent ? 'CORE' : 'PRISM'}
+                        </div>
                     </div>
-                    <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.75rem', marginTop: 4 }}>
-                        LEVEL {user.year || 1} // {user.isPSGStudent ? 'CORE' : 'PRISM'}
-                    </div>
-                </div>
+                )}
                 
                 {/* Three.js Canvas */}
                 <div 
@@ -212,15 +263,28 @@ const styles = theme => {
         root: {
             width: '100%',
             minHeight: '100vh',
+            position: 'relative',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: 20,
+            padding: '40px 20px 20px',
             overflowX: 'hidden',
             '@media (max-width: 960px)': {
                 alignItems: 'flex-start',
                 padding: '80px 15px 30px', 
                 height: 'auto'
+            }
+        },
+        headerActions: {
+            position: 'absolute',
+            top: 20,
+            right: 20,
+            display: 'flex',
+            gap: 12,
+            zIndex: 100,
+            '@media (max-width: 960px)': {
+                top: 30,
+                right: 15,
             }
         },
         dashboardContainer: {
@@ -279,8 +343,24 @@ const styles = theme => {
             display: 'flex',
             alignItems: 'center',
             gap: 15,
+            position: 'relative', // For positioning the mobile graph
             // Mobile Order: 1 (First)
             '@media (max-width: 960px)': { order: 1 }
+        },
+        mobileGraphContainer: {
+            display: 'none', // Hidden by default
+            '@media (max-width: 960px)': {
+                display: 'block',
+                width: 70,
+                height: 70,
+                position: 'absolute',
+                right: 15,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                borderRadius: 8,
+                overflow: 'hidden',
+                border: '1px solid rgba(255,255,255,0.1)'
+            }
         },
         avatarCircle: {
             width: 50,
@@ -306,13 +386,19 @@ const styles = theme => {
             fontWeight: 800,
             fontSize: '1rem',
             letterSpacing: 1,
-            margin: 0
+            margin: 0,
+            '@media (max-width: 960px)': {
+                fontSize: '0.9rem'
+            }
         },
         idTag: {
             color: theme.color.secondary.main,
             fontSize: '0.75rem',
             letterSpacing: 2,
-            marginBottom: 4
+            marginBottom: 4,
+            '@media (max-width: 960px)': {
+                fontSize: '0.65rem'
+            }
         },
         verifiedBadge: {
             background: 'rgba(0, 255, 100, 0.2)',
@@ -336,15 +422,19 @@ const styles = theme => {
             overflowY: 'auto',
             paddingRight: 5,
             paddingBottom: 10,
-            '&::-webkit-scrollbar': { width: 4 },
-            '&::-webkit-scrollbar-thumb': { backgroundColor: theme.color.secondary.dark, borderRadius: 2 },
+            '&::-webkit-scrollbar': { width: 6 }, // Slightly wider for border
+            '&::-webkit-scrollbar-thumb': { 
+                backgroundColor: 'transparent',
+                border: '2px solid #FFD700', // Yellow border
+                borderRadius: 0 // Rectangle shape
+            },
             '@media (max-width: 960px)': {
                 display: 'contents' // Flatten children for reordering
             }
         },
         dataPanel: {
             background: 'rgba(10, 5, 10, 0.7)',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
+            border: '1px solid rgba(255,255,255,0.1)',
             borderRadius: 12,
             padding: 20,
             transition: 'all 0.3s ease',
@@ -353,9 +443,37 @@ const styles = theme => {
                 boxShadow: `0 0 20px ${theme.color.secondary.main}20`
             }
         },
+        accordionHeader: {
+            cursor: 'pointer',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            '&::after': {
+                content: '"\\25BC"', // Down arrow
+                transition: 'transform 0.3s ease',
+                fontSize: '0.8rem',
+                color: '#888'
+            }
+        },
+        accordionHeaderOpen: {
+            '&::after': {
+                transform: 'rotate(180deg)' // Up arrow
+            }
+        },
+        accordionContent: {
+            maxHeight: 0,
+            overflow: 'hidden',
+            transition: 'max-height 0.5s ease-out, padding-top 0.5s ease-out',
+            paddingTop: 0,
+        },
+        accordionContentOpen: {
+            paddingTop: 15,
+            maxHeight: '1500px', // Large enough to not clip content
+            transition: 'max-height 1s ease-in, padding-top 0.5s ease-in',
+        },
         // Helpers for mobile ordering of panels
-        panelOrder2: { '@media (max-width: 960px)': { order: 2 } }, // QR/Status
-        panelOrder3: { '@media (max-width: 960px)': { order: 3 } }, // Personal
+        panelOrder2: { '@media (max-width: 960px)': { order: 3 } }, // Profile Details
+        panelOrder3: { '@media (max-width: 960px)': { order: 4 } }, // Account Status
         panelOrder5: { '@media (max-width: 960px)': { order: 5 } }, // Academic
         panelOrder6: { '@media (max-width: 960px)': { order: 6 } }, // Events
         
@@ -460,6 +578,32 @@ const styles = theme => {
             gap: 4
         },
         
+        // --- Mobile Actions Bar ---
+        mobileActionsContainer: {
+            display: 'none',
+            '@media (max-width: 960px)': {
+                order: 2, // Show right after the main identity card
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'stretch',
+                gap: 0,
+                padding: '15px',
+                background: 'rgba(10, 5, 10, 0.7)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: 12,
+            }
+        },
+        mobileSectionHeader: {
+            fontFamily: theme.typography.primary,
+            fontSize: '0.9rem',
+            color: '#fff',
+            textTransform: 'uppercase',
+            letterSpacing: 1,
+            margin: 0,
+            paddingBottom: 4,
+            borderBottom: `2px solid ${theme.color.secondary.main}`,
+        },
+
         // --- QR OVERLAY ---
         qrOverlay: {
             position: 'fixed',
@@ -516,8 +660,8 @@ const styles = theme => {
             background: '#1a1a1a',
             padding: 20,
             borderRadius: 16,
-            maxWidth: '90vw',
-            maxHeight: '90vh',
+            width: '90vw',
+            height: '90vh',
             display: 'flex',
             flexDirection: 'column',
             gap: 15,
@@ -550,13 +694,25 @@ const styles = theme => {
         },
         idViewerMedia: {
             flex: 1,
-            overflow: 'auto',
-            '& img, & embed': {
-                maxWidth: '100%',
-                maxHeight: 'calc(90vh - 100px)',
+            width: '100%', // Ensure full width
+            minHeight: 0, // Critical for flex child scrolling/sizing
+            overflow: 'hidden', 
+            position: 'relative',
+            '& img': {
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain', 
                 display: 'block',
                 margin: '0 auto',
                 borderRadius: 8
+            },
+            '& embed': {
+                width: '100%',
+                height: '100%',
+                display: 'block',
+                margin: '0 auto',
+                borderRadius: 8,
+                border: 'none'
             }
         },
 
@@ -565,30 +721,57 @@ const styles = theme => {
             justifyContent: 'flex-end',
             gap: 12,
             marginTop: 'auto',
-            '@media (max-width: 960px)': { order: 7 }
+            '@media (max-width: 960px)': { 
+                order: 7,
+                display: 'none' // Hide original buttons on mobile
+            }
         },
         actionBtn: {
-            padding: '10px 24px',
-            borderRadius: 24,
+            padding: '8px 16px',
             border: 'none',
             cursor: 'pointer',
             fontFamily: theme.typography.primary,
             fontWeight: 700,
             textTransform: 'uppercase',
-            fontSize: '0.8rem',
-            transition: 'all 0.3s ease'
+            fontSize: '0.75rem',
+            transition: 'all 0.3s ease',
+            textAlign: 'center',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            whiteSpace: 'nowrap', // Prevent text wrapping
+            background: 'rgba(255,255,255,0.1)',
+            color: '#fff',
+            border: '1px solid rgba(255,255,255,0.2)',
+            '&:hover': {
+                background: 'rgba(255,255,255,0.2)'
+            },
+            '@media (max-width: 960px)': {
+                padding: '6px 12px',
+                fontSize: '0.7rem',
+            },
+            '@media (max-width: 480px)': {
+                padding: '6px 12px',
+                fontSize: '0.65rem',
+            }
         },
         btnBack: {
             background: 'transparent',
             border: `1px solid ${theme.color.secondary.main}`,
             color: '#fff',
-            '&:hover': { background: theme.color.secondary.main }
+            '&:hover, &:active': { 
+                background: theme.color.secondary.main,
+                color: '#fff !important'
+            }
         },
         btnLogout: {
             background: theme.color.secondary.main,
             color: '#fff',
             boxShadow: `0 0 15px ${theme.color.secondary.main}60`,
-            '&:hover': { transform: 'scale(1.05)' }
+            '&:hover, &:active': { 
+                transform: 'scale(1.05)',
+                color: '#fff !important'
+            }
         }
     };
 };
@@ -606,7 +789,12 @@ class ProfilePage extends React.Component {
             isIdViewerOpen: false, // ID Viewer Modal State
             idCardPreviewUrl: null, // Blob URL for the ID
             idCardPreviewType: null, // 'image' or 'pdf'
-            isIdLoading: false // Loading state for fetching ID
+            isIdLoading: false, // Loading state for fetching ID
+            idToUpload: null, // Staged file for upload
+            idToUploadPreview: null, // Preview URL for staged file
+            idToUploadType: null, // Type of staged file
+            openAccordion: null, // Tracks which accordion is open on mobile
+            isMobile: false // Tracks if mobile view is active
         };
         this.fileInputRef = React.createRef();
     }
@@ -618,6 +806,13 @@ class ProfilePage extends React.Component {
 
     componentDidMount() {
         this.checkAuth();
+        const checkMobile = () => this.setState({ isMobile: window.innerWidth <= 960 });
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+    }
+
+    componentWillUnmount() {
+        window.removeEventListener('resize', this.checkMobile);
     }
 
     checkAuth = async () => {
@@ -740,9 +935,21 @@ class ProfilePage extends React.Component {
             return;
         }
 
+        // Create a preview URL
+        const previewUrl = URL.createObjectURL(file);
+        this.setState({
+            idToUpload: file,
+            idToUploadPreview: previewUrl,
+            idToUploadType: file.type.startsWith('image/') ? 'image' : 'pdf'
+        });
+    };
+
+    confirmIdUpload = async () => {
+        const { idToUpload } = this.state;
+        if (!idToUpload) return;
+
         const formData = new FormData();
-        // Using 'idCard' as field name, common convention for named uploads
-        formData.append('idCard', file);
+        formData.append('idCard', idToUpload);
 
         this.setState({ isUploadingId: true });
 
@@ -761,7 +968,12 @@ class ProfilePage extends React.Component {
             const msg = error.response?.data?.message || 'Failed to upload ID Card.';
             alert(msg);
         } finally {
-            this.setState({ isUploadingId: false });
+            this.setState({
+                isUploadingId: false,
+                idToUpload: null,
+                idToUploadPreview: null,
+                idToUploadType: null
+            });
             // Reset input value to allow re-uploading the same file if needed
             if (this.fileInputRef.current) {
                 this.fileInputRef.current.value = '';
@@ -769,15 +981,52 @@ class ProfilePage extends React.Component {
         }
     };
 
+    cancelIdUpload = () => {
+        if (this.state.idToUploadPreview) {
+            URL.revokeObjectURL(this.state.idToUploadPreview);
+        }
+        this.setState({
+            idToUpload: null,
+            idToUploadPreview: null,
+            idToUploadType: null
+        });
+        if (this.fileInputRef.current) {
+            this.fileInputRef.current.value = '';
+        }
+    };
+
+    toggleAccordion = (panel) => {
+        this.setState(prevState => ({
+            openAccordion: prevState.openAccordion === panel ? null : panel
+        }));
+    };
+
     render() {
         const { classes } = this.props;
-        const { user, loading, registeredEvents, isQRExpanded, isUploadingId, viewIdUrl, isIdViewerOpen, idCardPreviewUrl, idCardPreviewType, isIdLoading } = this.state;
+        const { user, loading, registeredEvents, isQRExpanded, isUploadingId, viewIdUrl, isIdViewerOpen, idCardPreviewUrl, idCardPreviewType, isIdLoading, idToUpload, idToUploadPreview, idToUploadType, openAccordion, isMobile } = this.state;
 
         if (loading || !user) return null;
 
         return (
             <SecuenceComponent>
                 <div className={classes.root}>
+                    {/* Hidden file input, available on all screen sizes */}
+                    <input
+                        type="file"
+                        ref={this.fileInputRef}
+                        style={{ display: 'none' }}
+                        accept=".pdf,.jpg,.jpeg,.png,.webp"
+                        onChange={this.handleIdCardUpload}
+                    />
+                    <div className={classes.headerActions}>
+                        <Button className={`${classes.actionBtn} ${classes.btnBack}`} onClick={this.handleBack}>
+                            Home
+                        </Button>
+                        <Button className={`${classes.actionBtn} ${classes.btnLogout}`} onClick={this.handleLogout}>
+                            Logout
+                        </Button>
+                    </div>
+
                     <div className={classes.dashboardContainer}>
                         
                         {/* LEFT COLUMN: VISUALS + IDENTITY */}
@@ -797,170 +1046,191 @@ class ProfilePage extends React.Component {
                                         </div>
                                     )}
                                 </div>
+                                <div className={classes.mobileGraphContainer}>
+                                    <IdentityNode user={user} isMobile={isMobile} />
+                                </div>
                             </div>
 
-                            {/* 2. Interactive Graph (Fourth on Mobile) */}
-                            <div className={classes.scannerContainer}>
-                                <IdentityNode user={user} />
-                                <div className={classes.scannerOverlay} />
-                            </div>
+                            {/* 2. Interactive Graph (Fourth on Mobile, hidden if mobile) */}
+                            {!isMobile && (
+                                <div className={classes.scannerContainer}>
+                                    <IdentityNode user={user} isMobile={isMobile} />
+                                    <div className={classes.scannerOverlay} />
+                                </div>
+                            )}
 
                         </div>
 
                         {/* RIGHT COLUMN: DATA DETAILS */}
                         <div className={classes.rightColumn}>
                              
+                             {/* NEW: Mobile Quick Actions */}
+                             {isMobile && (
+                                <MobileActions 
+                                    user={user}
+                                    classes={classes}
+                                    onQrClick={this.toggleQRExpansion}
+                                    onIdClick={this.handleIdCardClick}
+                                    onViewIdClick={this.handleViewIdCard}
+                                    isIdLoading={isIdLoading}
+                                    viewIdUrl={viewIdUrl}
+                                    idToUpload={idToUpload}
+                                />
+                             )}
+
                              {/* 3. Personal Profile & QR (Merged) */}
                              <div className={`${classes.dataPanel} ${classes.panelOrder2}`}>
-                                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap-reverse', gap: 20}}>
-                                    
-                                    {/* Info Side */}
-                                    <div style={{flex: 1, minWidth: '200px', display: 'flex', flexDirection: 'column', gap: 12}}>
-                                        <h3 className={classes.panelHeader} style={{marginBottom: 10}}>Profile Details</h3>
-                                        <div className={classes.dataGrid}>
-                                            <div className={classes.dataField}>
-                                                <label className={classes.fieldLabel}>Phone</label>
-                                                <div className={classes.fieldValue}>{user.phone}</div>
-                                            </div>
-                                            <div className={classes.dataField}>
-                                                <label className={classes.fieldLabel}>Gender</label>
-                                                <div className={classes.fieldValue}>{user.gender || '-'}</div>
-                                            </div>
-                                            <div className={classes.dataField} style={{gridColumn: '1 / -1'}}>
-                                                <label className={classes.fieldLabel}>College / Institution</label>
-                                                <div className={classes.fieldValue} style={{whiteSpace: 'normal', lineHeight: 1.4}}>{user.college}</div>
-                                            </div>
-                                            <div className={classes.dataField} style={{gridColumn: '1 / -1'}}>
-                                                <label className={classes.fieldLabel}>Department</label>
-                                                <div className={classes.fieldValue}>{user.department}</div>
+                                <div 
+                                    className={isMobile ? `${classes.accordionHeader} ${openAccordion === 'profile' ? classes.accordionHeaderOpen : ''}` : ''}
+                                    onClick={() => isMobile && this.toggleAccordion('profile')}
+                                >
+                                    <h3 className={classes.panelHeader} style={{ marginBottom: isMobile ? 0 : 10 }}>Profile Details</h3>
+                                </div>
+                                <div className={isMobile ? `${classes.accordionContent} ${openAccordion === 'profile' ? classes.accordionContentOpen : ''}` : ''}>
+                                    <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap-reverse', gap: 20, paddingTop: isMobile ? 0 : 15}}>
+                                        
+                                        {/* Info Side */}
+                                        <div style={{flex: 1, minWidth: '200px', display: 'flex', flexDirection: 'column', gap: 12}}>
+                                            <div className={classes.dataGrid}>
+                                                <div className={classes.dataField}>
+                                                    <label className={classes.fieldLabel}>Phone</label>
+                                                    <div className={classes.fieldValue}>{user.phone}</div>
+                                                </div>
+                                                <div className={classes.dataField}>
+                                                    <label className={classes.fieldLabel}>Gender</label>
+                                                    <div className={classes.fieldValue}>{user.gender || '-'}</div>
+                                                </div>
+                                                <div className={classes.dataField} style={{gridColumn: '1 / -1'}}>
+                                                    <label className={classes.fieldLabel}>College / Institution</label>
+                                                    <div className={classes.fieldValue} style={{whiteSpace: 'normal', lineHeight: 1.4}}>{user.college}</div>
+                                                </div>
+                                                <div className={classes.dataField} style={{gridColumn: '1 / -1'}}>
+                                                    <label className={classes.fieldLabel}>Department</label>
+                                                    <div className={classes.fieldValue}>{user.department}</div>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
 
-                                    {/* QR Side */}
-                                    <div className={classes.qrContainer} onClick={this.toggleQRExpansion}>
-                                        <div className={classes.qrBox}>
-                                            <QRCodeSVG
-                                                value={JSON.stringify({ type: "PARTICIPANT", id: user.uniqueId })}
-                                                size={110}
-                                            />
-                                        </div>
-                                        <div className={classes.qrExpandHint}>
-                                             Tap to expand
-                                        </div>
+                                        {/* QR Side (Desktop only now) */}
+                                        {!isMobile && (
+                                            <div className={classes.qrContainer} onClick={this.toggleQRExpansion}>
+                                                <div className={classes.qrBox}>
+                                                    <QRCodeSVG
+                                                        value={JSON.stringify({ type: "PARTICIPANT", id: user.uniqueId })}
+                                                        size={110}
+                                                    />
+                                                </div>
+                                                <div className={classes.qrExpandHint}>
+                                                     Tap to expand
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>
 
                             {/* 4. Account & Payment Status (Moved Down) */}
                             <div className={`${classes.dataPanel} ${classes.panelOrder3}`}>
-                                <h3 className={classes.panelHeader}>Account Status</h3>
-                                <div className={classes.dataGrid}>
-                                    <div className={classes.dataField} style={{gridColumn: '1 / -1'}}>
-                                        <label className={classes.fieldLabel}>Email</label>
-                                        <div className={classes.fieldValue}>{user.email}</div>
-                                    </div>
-                                    <div className={classes.dataField}>
-                                        <label className={classes.fieldLabel}>General Fee</label>
-                                        {user.generalFeePaid ? (
-                                             <span className={classes.statusPaid}><span>●</span> Paid</span>
-                                        ) : (
-                                            <span className={classes.statusPending}>Pending</span>
-                                        )}
-                                    </div>
-                                    <div className={classes.dataField}>
-                                        <label className={classes.fieldLabel}>Student Type</label>
-                                        <div className={classes.fieldValue}>{user.isPSGStudent ? 'PSG Student' : 'External'}</div>
-                                    </div>
-                                    <div className={classes.dataField}>
-                                        <label className={classes.fieldLabel}>Accommodation</label>
-                                        <div className={classes.fieldValue}>{user.accomodation ? 'Yes' : 'No'}</div>
-                                    </div>
-                                    <div className={classes.dataField}>
-                                        <label className={classes.fieldLabel}>Reg. Source</label>
-                                        <div className={classes.fieldValue} style={{textTransform:'capitalize'}}>{user.source}</div>
-                                    </div>
+                                <div 
+                                    className={isMobile ? `${classes.accordionHeader} ${openAccordion === 'account' ? classes.accordionHeaderOpen : ''}` : ''}
+                                    onClick={() => isMobile && this.toggleAccordion('account')}
+                                >
+                                    <h3 className={classes.panelHeader} style={{ marginBottom: isMobile ? 0 : 15 }}>Account Status</h3>
                                 </div>
-
-                                {/* ID Card Upload Section */}
-                                <div style={{ marginTop: 20, paddingTop: 15, borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-                                    <input
-                                        type="file"
-                                        ref={this.fileInputRef}
-                                        style={{ display: 'none' }}
-                                        accept=".pdf,.jpg,.jpeg,.png,.webp"
-                                        onChange={this.handleIdCardUpload}
-                                    />
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
-                                        <div>
-                                            <div className={classes.fieldLabel} style={{marginBottom: 2}}>Identity Verification</div>
-                                            <div style={{ fontSize: '0.7rem', color: '#888' }}>Upload College ID (Max 10MB)</div>
-                                            {user.idCardUploaded && (
-                                                <div style={{ color: '#00ff64', fontSize: '0.7rem', marginTop: 2 }}>✓ ID Card Uploaded</div>
+                                <div className={isMobile ? `${classes.accordionContent} ${openAccordion === 'account' ? classes.accordionContentOpen : ''}` : ''}>
+                                    <div className={classes.dataGrid} style={{paddingTop: isMobile ? 0 : 15}}>
+                                        <div className={classes.dataField} style={{gridColumn: '1 / -1'}}>
+                                            <label className={classes.fieldLabel}>Email</label>
+                                            <div className={classes.fieldValue}>{user.email}</div>
+                                        </div>
+                                        <div className={classes.dataField}>
+                                            <label className={classes.fieldLabel}>General Fee</label>
+                                            {user.generalFeePaid ? (
+                                                 <span className={classes.statusPaid}><span>●</span> Paid</span>
+                                            ) : (
+                                                <span className={classes.statusPending}>Pending</span>
                                             )}
                                         </div>
-                                        <div style={{ display: 'flex', gap: 8 }}>
-                                            {viewIdUrl && (
-                                                <button
-                                                    className={classes.actionBtn}
-                                                    style={{ fontSize: '0.7rem', padding: '8px 16px', backgroundColor: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)'}}
-                                                    onClick={this.handleViewIdCard}
-                                                    disabled={isIdLoading}
-                                                >
-                                                    {isIdLoading ? 'Loading...' : 'View ID'}
-                                                </button>
-                                            )}
-                                            <button 
-                                                className={classes.actionBtn}
-                                                style={{ 
-                                                    fontSize: '0.7rem', 
-                                                    padding: '8px 16px', 
-                                                    backgroundColor: 'rgba(255,255,255,0.1)', 
-                                                    color: '#fff',
-                                                    border: '1px solid rgba(255,255,255,0.2)',
-                                                    minWidth: 100
-                                                }}
-                                                onClick={this.handleIdCardClick}
-                                                disabled={isUploadingId}
-                                            >
-                                                {isUploadingId ? 'Uploading...' : (user.idCardUploaded ? 'Re-upload' : 'Upload')}
-                                            </button>
+                                        <div className={classes.dataField}>
+                                            <label className={classes.fieldLabel}>Student Type</label>
+                                            <div className={classes.fieldValue}>{user.isPSGStudent ? 'PSG Student' : 'External'}</div>
+                                        </div>
+                                        <div className={classes.dataField}>
+                                            <label className={classes.fieldLabel}>Accommodation</label>
+                                            <div className={classes.fieldValue}>{user.accomodation ? 'Yes' : 'No'}</div>
+                                        </div>
+                                        <div className={classes.dataField}>
+                                            <label className={classes.fieldLabel}>Reg. Source</label>
+                                            <div className={classes.fieldValue} style={{textTransform:'capitalize'}}>{user.source}</div>
                                         </div>
                                     </div>
+
+                                    {/* ID Card Upload Section (Desktop only now) */}
+                                    {!isMobile && (
+                                        <div style={{ marginTop: 20, paddingTop: 15, borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
+                                                <div>
+                                                    <h3 className={classes.panelHeader} style={{ marginBottom: isMobile ? 0 : 10 }}>Identity Verification</h3>
+                                                    <div style={{ fontSize: '0.7rem', color: '#888' }}>Upload College ID (Max 10MB)</div>
+                                                    {user.idCardUploaded && !idToUpload && (
+                                                        <div style={{ color: '#00ff64', fontSize: '0.7rem', marginTop: 2 }}>✓ ID Card Uploaded</div>
+                                                    )}
+                                                </div>
+                                                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                                                    {viewIdUrl && !idToUpload && (
+                                                        <button
+                                                            className={classes.actionBtn}
+                                                            onClick={this.handleViewIdCard}
+                                                            disabled={isIdLoading}
+                                                        >
+                                                            {isIdLoading ? 'Loading...' : 'View ID'}
+                                                        </button>
+                                                    )}
+                                                    {!idToUpload && (
+                                                        <button
+                                                            className={classes.actionBtn}
+                                                            onClick={this.handleIdCardClick}
+                                                            disabled={isUploadingId}
+                                                        >
+                                                            {isUploadingId ? '...' : (user.idCardUploaded ? 'Re-upload' : 'Upload')}
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
                             {/* 5. Registered Events Section */}
                             <div className={`${classes.dataPanel} ${classes.panelOrder6}`}>
-                                <h3 className={classes.panelHeader}>Registered Events</h3>
-                                {registeredEvents && registeredEvents.length > 0 ? (
-                                    <div className={classes.dataGrid}>
-                                        {registeredEvents.map((event, index) => (
-                                            <div key={index} className={classes.dataField}>
-                                                <label className={classes.fieldLabel}>{event.category || 'Event'}</label>
-                                                <div className={classes.fieldValue} title={event.eventName || event.name}>
-                                                    {event.eventName || event.name || 'Unnamed Event'}
+                                <div 
+                                    className={isMobile ? `${classes.accordionHeader} ${openAccordion === 'events' ? classes.accordionHeaderOpen : ''}` : ''}
+                                    onClick={() => isMobile && this.toggleAccordion('events')}
+                                >
+                                    <h3 className={classes.panelHeader} style={{ marginBottom: isMobile ? 0 : 15 }}>Registered Events</h3>
+                                </div>
+                                <div className={isMobile ? `${classes.accordionContent} ${openAccordion === 'events' ? classes.accordionContentOpen : ''}` : ''}>
+                                    {registeredEvents && registeredEvents.length > 0 ? (
+                                        <div className={classes.dataGrid} style={{paddingTop: isMobile ? 0 : 15}}>
+                                            {registeredEvents.map((event, index) => (
+                                                <div key={index} className={classes.dataField}>
+                                                    <label className={classes.fieldLabel}>{event.category || 'Event'}</label>
+                                                    <div className={classes.fieldValue} title={event.eventName || event.name}>
+                                                        {event.eventName || event.name || 'Unnamed Event'}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <div style={{ padding: '10px', color: '#888', fontStyle: 'italic', fontSize: '0.85rem' }}>
-                                        No registered events yet.
-                                    </div>
-                                )}
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div style={{ padding: '10px', color: '#888', fontStyle: 'italic', fontSize: '0.85rem', paddingTop: isMobile ? 0 : 15 }}>
+                                            No registered events yet.
+                                        </div>
+                                    )}
+                                </div>
                             </div>
 
                             {/* Action Buttons */}
-                            <div className={classes.actionsRow}>
-                                <button className={`${classes.actionBtn} ${classes.btnBack}`} onClick={this.handleBack}>
-                                    Home
-                                </button>
-                                <button className={`${classes.actionBtn} ${classes.btnLogout}`} onClick={this.handleLogout}>
-                                    Logout
-                                </button>
-                            </div>
-
                         </div>
                     </div>
 
@@ -968,15 +1238,11 @@ class ProfilePage extends React.Component {
                     {isQRExpanded && (
                         <div className={classes.qrOverlay} onClick={this.toggleQRExpansion}>
                             <div className={classes.qrExpandedContent} onClick={(e) => e.stopPropagation()}>
-                                <h3 className={classes.qrExpandedLabel}>{user.name}</h3>
                                 <QRCodeSVG
                                     value={JSON.stringify({ type: "PARTICIPANT", id: user.uniqueId })}
                                     size={300}
                                 />
-                                <div style={{textAlign:'center', fontSize:'0.9rem', color:'#555'}}>
-                                    {user.uniqueId}
-                                </div>
-                                <div className={classes.qrCloseHint}>
+                                <div className={classes.qrCloseHint} style={{ color: 'black', fontSize: '16px'}}>
                                     Tap outside to close
                                 </div>
                             </div>
@@ -1000,6 +1266,46 @@ class ProfilePage extends React.Component {
                                     {idCardPreviewType === 'pdf' && (
                                         <embed src={idCardPreviewUrl} type="application/pdf" width="100%" height="100%" />
                                     )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* UPLOAD CONFIRMATION OVERLAY (Both Mobile & Desktop) */}
+                    {idToUpload && (
+                        <div className={classes.idViewerOverlay} onClick={this.cancelIdUpload}>
+                            <div className={classes.idViewerContent} onClick={(e) => e.stopPropagation()}>
+                                <div className={classes.idViewerHeader}>
+                                    <span>Confirm Upload</span>
+                                    <button className={classes.idViewerCloseBtn} onClick={this.cancelIdUpload}>
+                                        &times;
+                                    </button>
+                                </div>
+                                <div className={classes.idViewerMedia}>
+                                    {idToUploadType === 'image' && (
+                                        <img src={idToUploadPreview} alt="Upload Preview" />
+                                    )}
+                                    {idToUploadType === 'pdf' && (
+                                        <embed src={idToUploadPreview} type="application/pdf" width="100%" height="100%" />
+                                    )}
+                                </div>
+                                <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 15, flexShrink: 0 }}>
+                                    <button 
+                                        className={classes.actionBtn} 
+                                        onClick={this.cancelIdUpload} 
+                                        disabled={isUploadingId}
+                                        style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.3)' }}
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button 
+                                        className={classes.actionBtn} 
+                                        onClick={this.confirmIdUpload} 
+                                        disabled={isUploadingId}
+                                        style={{ background: '#00ff64', color: '#000', border: 'none', fontWeight: 800 }}
+                                    >
+                                        {isUploadingId ? 'Uploading...' : 'Confirm'}
+                                    </button>
                                 </div>
                             </div>
                         </div>
