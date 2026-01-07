@@ -1,7 +1,8 @@
 'use client';
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import cx from 'classnames';
+import { usePathname } from 'next/navigation';
 
 import { AppContent } from '../AppContent';
 import { Header } from '../Header';
@@ -11,7 +12,19 @@ import { useShutter } from '@/context/ShutterContext';
 // Wrapper component to use hooks
 function AppWithShutter({ classes, className, children, ...etc }) {
   const { shutterState } = useShutter();
+  const pathname = usePathname();
   const isShuttering = shutterState === 'closing' || shutterState === 'closed' || shutterState === 'opening';
+  const contentRef = useRef(null);
+
+  // Scroll to top on mount (handles client-side navigation)
+  useEffect(() => {
+    if (contentRef.current) {
+      contentRef.current.scrollTo(0, 0);
+    }
+  }, []);
+
+  // Only show footer on home route
+  const showFooter = pathname === '/';
 
   return (
     <div className={cx(classes.root, className)} {...etc}>
@@ -22,13 +35,16 @@ function AppWithShutter({ classes, className, children, ...etc }) {
           shutterState === 'closed' && classes.shutterClosed,
           shutterState === 'opening' && classes.shutterOpening
         )}
-        ref={ref => (window.__appContentElement = ref)}
+        ref={ref => {
+          contentRef.current = ref;
+          window.__appContentElement = ref;
+        }}
       >
         <Header />
         <AppContent>
           {children}
         </AppContent>
-        <Footer />
+        {showFooter && <Footer />}
       </div>
     </div>
   );

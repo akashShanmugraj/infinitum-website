@@ -27,7 +27,7 @@ function withAnimation(providedOptions) {
       }
 
       componentDidMount() {
-        this.flow();
+        this.flow(true);
       }
 
       componentDidUpdate() {
@@ -41,7 +41,7 @@ function withAnimation(providedOptions) {
         this.prevContext = this.context;
       }
 
-      flow() {
+      flow(isInitialMount = false) {
         const energy = this.context;
 
         if (!options.flow) {
@@ -56,6 +56,10 @@ function withAnimation(providedOptions) {
           this.inner.enter();
         } else if (energy.exiting) {
           this.inner.exit();
+        } else if (isInitialMount && energy.entered) {
+          // When component mounts and parent is already entered (e.g., client-side navigation),
+          // we need to trigger the enter animation
+          this.inner.enter();
         }
       }
 
