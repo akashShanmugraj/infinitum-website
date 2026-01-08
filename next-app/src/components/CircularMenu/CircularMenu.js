@@ -40,7 +40,8 @@ export default function CircularMenu() {
     const [isMobile, setIsMobile] = useState(false);
     const [rotationAngle, setRotationAngle] = useState(0); // Track actual rotation
     const [isDragging, setIsDragging] = useState(false); // Track drag state for icon transitions
-    const [showHint, setShowHint] = useState(false); // First-time user hint
+    const [showHint, setShowHint] = useState(false); // First-time user hint (mobile)
+    const [showDesktopHint, setShowDesktopHint] = useState(false); // Desktop keyboard hint
     const pathname = usePathname();
     const router = useRouter();
     const menuRef = useRef(null);
@@ -66,10 +67,22 @@ export default function CircularMenu() {
 
         // Check if user has seen the menu hint before
         const hasSeenHint = localStorage.getItem('menu_hint_seen');
-        if (!hasSeenHint) {
-            // Show hint after a short delay
+        const hasSeenDesktopHint = localStorage.getItem('menu_desktop_hint_seen');
+        
+        if (!hasSeenHint && window.innerWidth <= 768) {
+            // Show mobile hint after a short delay
             const timer = setTimeout(() => {
                 setShowHint(true);
+            }, 2000);
+
+            return () => {
+                clearTimeout(timer);
+                window.removeEventListener('resize', checkMobile);
+            };
+        } else if (!hasSeenDesktopHint && window.innerWidth > 768) {
+            // Show desktop keyboard hint
+            const timer = setTimeout(() => {
+                setShowDesktopHint(true);
             }, 2000);
 
             return () => {
@@ -158,7 +171,8 @@ export default function CircularMenu() {
             const adjustedAngle = (angle - rotationAngle + segmentAngle / 2 + 360) % 360;
             const segmentIndex = Math.floor(adjustedAngle / segmentAngle);
             setHoveredIndex(segmentIndex % MENU_ITEMS.length);
-        } else if (distance <= 50) {
+        } else {
+            // Clear hover when mouse is outside the ring area
             setHoveredIndex(null);
             setMouseAngle(null);
         }
@@ -167,7 +181,12 @@ export default function CircularMenu() {
     useEffect(() => {
         if (isOpen) {
             window.addEventListener('mousemove', handleMouseMove);
-            return () => window.removeEventListener('mousemove', handleMouseMove);
+            return () => {
+                window.removeEventListener('mousemove', handleMouseMove);
+                // Clear hover state when menu closes
+                setHoveredIndex(null);
+                setMouseAngle(null);
+            };
         }
     }, [isOpen, handleMouseMove]);
 
@@ -222,11 +241,15 @@ export default function CircularMenu() {
     const toggleMenu = () => {
         if (!isOpen) {
             playHowl(openSound);
-        }
-        // Hide hint when user clicks the menu
-        if (showHint) {
-            setShowHint(false);
-            localStorage.setItem('menu_hint_seen', 'true');
+            // Hide hints when menu opens for the first time
+            if (showHint) {
+                setShowHint(false);
+                localStorage.setItem('menu_hint_seen', 'true');
+            }
+            if (showDesktopHint) {
+                setShowDesktopHint(false);
+                localStorage.setItem('menu_desktop_hint_seen', 'true');
+            }
         }
         // Sync selected index with active index when opening
         if (!isOpen) {
@@ -443,6 +466,20 @@ export default function CircularMenu() {
                 </div>
             )}
 
+            {/* Desktop keyboard navigation hint */}
+            {showDesktopHint && (
+                <div
+                    className={styles.menuHint}
+                    onClick={() => {
+                        setShowDesktopHint(false);
+                        localStorage.setItem('menu_desktop_hint_seen', 'true');
+                    }}
+                >
+                    <span>Press Q to open navigation</span>
+                    <div className={styles.hintArrow}></div>
+                </div>
+            )}
+
             {/* Pie Menu - only render after mount to avoid hydration mismatch */}
             {isMounted && (
                 <div
@@ -462,9 +499,9 @@ export default function CircularMenu() {
                         >
                             {/* Segment backgrounds */}
                             {MENU_ITEMS.map((item, index) => {
-                                const isHovered = hoveredIndex === index;
+                                const isHovered = hoveredIndex === index && !isDragging;
                                 const isActive = activeIndex === index;
-                                const isSelected = selectedIndex === index;
+                                const isSelected = selectedIndex === index && !isActive;
 
                                 return (
                                     <g key={index}>
@@ -488,9 +525,9 @@ export default function CircularMenu() {
                         {/* Icons positioned on segments */}
                         {MENU_ITEMS.map((item, index) => {
                             const pos = getIconPosition(index);
-                            const isHovered = hoveredIndex === index;
+                            const isHovered = hoveredIndex === index && !isDragging;
                             const isActive = activeIndex === index;
-                            const isSelected = selectedIndex === index;
+                            const isSelected = selectedIndex === index && !isActive;
 
                             return (
                                 <a
