@@ -274,6 +274,8 @@ const styles = theme => ({
         borderLeft: `3px solid ${theme.color.primary.main}`,
         transition: 'all 0.3s ease',
         cursor: 'default',
+        position: 'relative',
+        minHeight: 80, // Fixed minimum height to prevent layout shift
         '&:hover': {
             backgroundColor: 'rgba(0, 0, 0, 0.5)',
             borderLeftColor: theme.color.primary.main,
@@ -309,6 +311,13 @@ const styles = theme => ({
         opacity: 0,
         overflow: 'hidden',
         transition: 'all 0.4s ease-out',
+        position: 'absolute',
+        left: 15,
+        right: 15,
+        backgroundColor: 'rgba(0, 0, 0, 0.9)',
+        padding: '0 10px',
+        borderRadius: 4,
+        zIndex: 10,
     },
 
     // Rules Section

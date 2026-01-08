@@ -9,8 +9,8 @@ import { useSound } from '@/context/SoundContext';
 const MENU_ITEMS = [
     { label: 'Home', icon: 'ri-home-line', href: '/', match: ['/'] },
     { label: 'Profile', icon: 'ri-user-line', href: '/portal/profile', match: ['/portal/profile', '/portal'] },
-    { label: 'Events', icon: 'ri-calendar-event-line', href: '/events?category=events', match: ['/events?category=events', '/events'] },
-    { label: 'Schedule', icon: 'ri-calendar-line', href: '/schedule', match: ['/schedule'] },
+    { label: 'Events', icon: 'ri-calendar-line', href: '/events?category=events', match: ['/events?category=events', '/events'] },
+    { label: 'Schedule', icon: 'ri-time-line', href: '/schedule', match: ['/schedule'] },
     { label: 'Workshops', icon: 'ri-tools-line', href: '/events?category=workshops', match: ['/events?category=workshops'] },
     { label: 'Papers', icon: 'ri-article-line', href: '/events?category=papers', match: ['/events?category=papers'] },
     { label: 'About', icon: 'ri-information-line', href: '/about', match: ['/about'] }

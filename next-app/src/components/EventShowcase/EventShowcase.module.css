@@ -141,6 +141,28 @@
   margin-top: 0;
   /* Align with top of Left Panel Stats */
   width: 100%;
+  max-height: 600px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 8px;
+}
+
+.roundsContainer::-webkit-scrollbar {
+  width: 6px;
+}
+
+.roundsContainer::-webkit-scrollbar-track {
+  background: rgba(10, 10, 10, 0.3);
+  border-radius: 3px;
+}
+
+.roundsContainer::-webkit-scrollbar-thumb {
+  background: rgba(199, 32, 113, 0.5);
+  border-radius: 3px;
+}
+
+.roundsContainer::-webkit-scrollbar-thumb:hover {
+  background: rgba(199, 32, 113, 0.8);
 }
 
 .roundsHeader {
@@ -152,6 +174,10 @@
   padding-top: 0;
   /* Reduced from 20px to move heading slightly up */
   border-bottom: 1px solid rgba(199, 32, 113, 0.3);
+  position: sticky;
+  top: 0;
+  background: rgba(0, 0, 0, 0.9);
+  z-index: 5;
 }
 
 .roundCount {
@@ -301,7 +327,7 @@
   max-width: 1400px;
   margin: 0 auto;
   width: 100%;
-  align-items: center;
+  align-items: start;
 }
 
 /* Stats Panels */
@@ -311,6 +337,7 @@
   gap: 20px;
   align-self: flex-start;
   margin-top: 0;
+  max-height: 800px;
 }
 
 /* Specific adjustment for Right Panel to move it "some more top" */
@@ -378,7 +405,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  align-self: start;
 }
 
 .eventHeader {
