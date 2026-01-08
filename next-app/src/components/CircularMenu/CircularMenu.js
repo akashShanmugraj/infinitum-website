@@ -9,8 +9,8 @@ import { useSound } from '@/context/SoundContext';
 const MENU_ITEMS = [
     { label: 'Home', icon: 'ri-home-line', href: '/', match: ['/'] },
     { label: 'Profile', icon: 'ri-user-line', href: '/portal/profile', match: ['/portal/profile', '/portal'] },
-    { label: 'Events', icon: 'ri-calendar-event-line', href: '/events?category=events', match: ['/events?category=events', '/events'] },
-    { label: 'Schedule', icon: 'ri-calendar-line', href: '/schedule', match: ['/schedule'] },
+    { label: 'Events', icon: 'ri-calendar-line', href: '/events?category=events', match: ['/events?category=events', '/events'] },
+    { label: 'Schedule', icon: 'ri-time-line', href: '/schedule', match: ['/schedule'] },
     { label: 'Workshops', icon: 'ri-tools-line', href: '/events?category=workshops', match: ['/events?category=workshops'] },
     { label: 'Papers', icon: 'ri-article-line', href: '/events?category=papers', match: ['/events?category=papers'] },
     { label: 'About', icon: 'ri-information-line', href: '/about', match: ['/about'] }
@@ -19,6 +19,7 @@ const MENU_ITEMS = [
 // Sound effects
 let rotateSound = null;
 let openSound = null;
+let hoverSound = null;
 
 if (typeof window !== 'undefined') {
     rotateSound = new Howl({
@@ -28,6 +29,10 @@ if (typeof window !== 'undefined') {
     openSound = new Howl({
         src: ['/sounds/expand.mp3'],
         volume: 0.25,
+    });
+    hoverSound = new Howl({
+        src: ['/sounds/hover.mp3'],
+        volume: 0.3,
     });
 }
 
@@ -71,25 +76,11 @@ export default function CircularMenu() {
         const hasSeenDesktopHint = localStorage.getItem('menu_desktop_hint_seen');
 
         if (!hasSeenHint && window.innerWidth <= 768) {
-            // Show mobile hint after a short delay
-            const timer = setTimeout(() => {
-                setShowHint(true);
-            }, 2000);
-
-            return () => {
-                clearTimeout(timer);
-                window.removeEventListener('resize', checkMobile);
-            };
+            // Show mobile hint immediately and keep it until user clicks
+            setShowHint(true);
         } else if (!hasSeenDesktopHint && window.innerWidth > 768) {
-            // Show desktop keyboard hint
-            const timer = setTimeout(() => {
-                setShowDesktopHint(true);
-            }, 2000);
-
-            return () => {
-                clearTimeout(timer);
-                window.removeEventListener('resize', checkMobile);
-            };
+            // Show desktop keyboard hint immediately and keep it until user uses Q or clicks menu
+            setShowDesktopHint(true);
         }
 
         return () => window.removeEventListener('resize', checkMobile);
@@ -215,7 +206,7 @@ export default function CircularMenu() {
                     const stepsForward = (newIndex - selectedIndex + MENU_ITEMS.length) % MENU_ITEMS.length;
                     setSelectedIndex(newIndex);
                     setRotationAngle(rotationAngle - stepsForward * segmentAngle);
-                    playHowl(rotateSound);
+                    playHowl(hoverSound);
                 } else if (e.key === 'ArrowRight') {
                     e.preventDefault();
                     // Rotate clockwise (next item) - forward motion
@@ -223,7 +214,7 @@ export default function CircularMenu() {
                     const stepsForward = (newIndex - selectedIndex + MENU_ITEMS.length) % MENU_ITEMS.length;
                     setSelectedIndex(newIndex);
                     setRotationAngle(rotationAngle - stepsForward * segmentAngle);
-                    playHowl(rotateSound);
+                    playHowl(hoverSound);
                 } else if (e.key === 'Enter') {
                     e.preventDefault();
                     // Navigate to selected page
@@ -251,6 +242,10 @@ export default function CircularMenu() {
                 setShowDesktopHint(false);
                 localStorage.setItem('menu_desktop_hint_seen', 'true');
             }
+            // Rotate wheel to show active page at top center when opening
+            const segmentAngle = 360 / MENU_ITEMS.length;
+            const targetRotation = -activeIndex * segmentAngle;
+            setRotationAngle(targetRotation);
         }
         // Sync selected index with active index when opening
         if (!isOpen) {
@@ -354,11 +349,9 @@ export default function CircularMenu() {
         if (Math.abs(deltaAngle) > 5) {
             isDraggingRef.current = true;
             setIsDragging(true); // Disable icon transitions
-
-            // Play rotation sound while dragging
-            if (rotateSound && !rotateSound.playing()) {
-                rotateSound.play();
-            }
+            
+            // Play hover sound while dragging
+            playHowl(hoverSound);
         }
 
         const newRotation = touchStartRef.current.rotation + deltaAngle;
@@ -453,29 +446,17 @@ export default function CircularMenu() {
                 <i className={`ri-close-line ${styles.closeIcon}`}></i>
             </button>
 
-            {/* First-time user hint tooltip - click to dismiss */}
+            {/* First-time user hint tooltip - will disappear when menu is used */}
             {showHint && (
-                <div
-                    className={styles.menuHint}
-                    onClick={() => {
-                        setShowHint(false);
-                        localStorage.setItem('menu_hint_seen', 'true');
-                    }}
-                >
+                <div className={styles.menuHint}>
                     <span>Click to navigate</span>
                     <div className={styles.hintArrow}></div>
                 </div>
             )}
 
-            {/* Desktop keyboard navigation hint */}
+            {/* Desktop keyboard navigation hint - will disappear when Q is pressed or menu is clicked */}
             {showDesktopHint && (
-                <div
-                    className={styles.menuHint}
-                    onClick={() => {
-                        setShowDesktopHint(false);
-                        localStorage.setItem('menu_desktop_hint_seen', 'true');
-                    }}
-                >
+                <div className={styles.menuHint}>
                     <span>Press Q to open navigation</span>
                     <div className={styles.hintArrow}></div>
                 </div>

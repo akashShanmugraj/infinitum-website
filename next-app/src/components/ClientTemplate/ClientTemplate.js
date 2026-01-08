@@ -7,6 +7,7 @@ import { Layout } from '@/components/Layout';
 import { App } from '@/components/App';
 import { Popup } from '@/components/Popup';
 import { styles } from './ClientTemplate.styles';
+import { usePopup } from '@/context/PopupContext';
 
 // Dynamically import Background with SSR disabled to prevent hydration mismatches
 const Background = dynamic(
@@ -17,9 +18,9 @@ const Background = dynamic(
 const Template = (props) => {
     const { classes, theme, children } = props;
     const pathname = usePathname();
+    const { hasSeenPopup, setHasSeenPopup } = usePopup();
 
     // Check if user has already seen the popup (using localStorage)
-    const [hasSeenPopup, setHasSeenPopup] = useState(true); // Default to true to prevent flash
     const [show, setShow] = useState(false);
     const [enterShow, setEnterShow] = useState(false);
     const [enterAnimationShow, setEnterAnimationShow] = useState(true);
@@ -32,7 +33,6 @@ const Template = (props) => {
 
         if (seen) {
             // User has seen popup before, skip it and show site immediately
-            setHasSeenPopup(true);
             setShow(true);
 
             // Unlock audio on first user interaction (required by browser autoplay policy)
@@ -63,7 +63,6 @@ const Template = (props) => {
             };
         } else {
             // First visit, show the popup
-            setHasSeenPopup(false);
             const timeout = setTimeout(
                 () => setEnterShow(true),
                 theme.animation.time || 250
@@ -75,6 +74,7 @@ const Template = (props) => {
     const onEnter = () => {
         // Mark popup as seen in localStorage
         localStorage.setItem('infinitum_popup_seen', 'true');
+        setHasSeenPopup(true);
 
         // Fade out popup
         setEnterAnimationShow(false);

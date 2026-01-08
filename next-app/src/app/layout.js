@@ -45,8 +45,10 @@ import ClientTemplate from "@/components/ClientTemplate/ClientTemplate";
 import { AuthProvider } from "@/context/AuthContext";
 import { SoundProvider } from "@/context/SoundContext";
 import { ShutterProvider } from "@/context/ShutterContext";
+import { PopupProvider } from "@/context/PopupContext";
 import CircularMenu from "@/components/CircularMenu/CircularMenu";
 import SoundMuteButton from "@/components/SoundMuteButton/SoundMuteButton";
+import CircularMenuWrapper from "@/components/CircularMenu/CircularMenuWrapper";
 
 export default function RootLayout({ children }) {
   return (
@@ -61,15 +63,17 @@ export default function RootLayout({ children }) {
       <body className={`${orbitron.variable} ${electrolize.variable}`} suppressHydrationWarning>
         <StylesProvider>
           <SoundProvider>
-            <AuthProvider>
-              <ShutterProvider>
-                <ClientTemplate>
-                  {children}
-                </ClientTemplate>
-                <CircularMenu />
-                <SoundMuteButton />
-              </ShutterProvider>
-            </AuthProvider>
+            <PopupProvider>
+              <AuthProvider>
+                <ShutterProvider>
+                  <ClientTemplate>
+                    {children}
+                  </ClientTemplate>
+                  <CircularMenuWrapper />
+                  <SoundMuteButton />
+                </ShutterProvider>
+              </AuthProvider>
+            </PopupProvider>
           </SoundProvider>
         </StylesProvider>
       </body>

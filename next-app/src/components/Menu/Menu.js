@@ -182,7 +182,6 @@ class Component extends React.PureComponent {
                 className={cx(classes.item, classes.link)}
                 onMouseEnter={() => sounds.hover.play()}
                 onClick={this.handleLogout}
-                style={{ marginRight: '60px' }}
               >
                 <Text
                   animation={{ animate: animateText }}
