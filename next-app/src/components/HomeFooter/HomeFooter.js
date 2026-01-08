@@ -42,7 +42,7 @@ const contactSections = [
         title: 'Accommodation (Girls)',
         contacts: [
             { name: 'Kanishka', phone: '+91 8838401957' },
-            { name: 'Thejashree N', phone: '+91 9842119832' }
+            { name: 'Thejashri N', phone: '+91 9842119832' }
         ]
     }
 ];
