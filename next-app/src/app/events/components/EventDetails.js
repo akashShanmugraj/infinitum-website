@@ -530,8 +530,14 @@ class EventDetails extends React.Component {
                             </div>
 
                             <div className={classes.infoItem}>
-                                <div className={classes.infoLabel}>Timing</div>
-                                <div className={classes.infoValue}>{event.timing || 'TBA'}</div>
+                                <div className={classes.infoLabel}>DATE AND TIME</div>
+                                <div className={classes.infoValue}>
+                                    {(event.dateAndTime || event.timing) ? 
+                                        (event.dateAndTime || event.timing).split(', ').map((part, idx) => (
+                                            <div key={idx}>{part}</div>
+                                        )) : 'TBA'
+                                    }
+                                </div>
                             </div>
                         </div>
                     </div>

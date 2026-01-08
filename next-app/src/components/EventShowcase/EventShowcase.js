@@ -558,8 +558,14 @@ export default function EventShowcase({ sounds, initialEventId }) {
                     </div>
 
                     <div className={styles.statItem}>
-                        <div className={styles.statLabel}>Timing</div>
-                        <div className={styles.statValue}>{currentEvent.timing}</div>
+                        <div className={styles.statLabel}>DATE AND TIME</div>
+                        <div className={styles.statValue}>
+                            {(currentEvent.dateAndTime || currentEvent.timing) && 
+                                (currentEvent.dateAndTime || currentEvent.timing).split(', ').map((part, idx) => (
+                                    <div key={idx}>{part}</div>
+                                ))
+                            }
+                        </div>
                     </div>
                 </div>
 
@@ -704,18 +710,14 @@ export default function EventShowcase({ sounds, initialEventId }) {
 
                                 {/* Event Info Grid */}
                                 <div className={styles.modalInfoGrid}>
-                                    {currentEvent.date && (
+                                    {(currentEvent.dateAndTime || currentEvent.timing) && (
                                         <div className={styles.modalInfoItem}>
-                                            <span className={styles.modalInfoLabel}>Date</span>
+                                            <span className={styles.modalInfoLabel}>DATE AND TIME</span>
                                             <span className={styles.modalInfoValue}>
-                                                {new Date(currentEvent.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                                                {(currentEvent.dateAndTime || currentEvent.timing).split(', ').map((part, idx) => (
+                                                    <div key={idx}>{part}</div>
+                                                ))}
                                             </span>
-                                        </div>
-                                    )}
-                                    {currentEvent.timing && (
-                                        <div className={styles.modalInfoItem}>
-                                            <span className={styles.modalInfoLabel}>Timing</span>
-                                            <span className={styles.modalInfoValue}>{currentEvent.timing}</span>
                                         </div>
                                     )}
                                     {currentEvent.hall && (

@@ -26,15 +26,15 @@ export const eventsData = [
             { "name": "Neelesh Padmanabh", "mobile": "8148401083", "_id": { "$oid": "694ce9c4297836cde7682482" } },
             { "name": "Atul Vasanthakrishnan", "mobile": "9345722948", "_id": { "$oid": "694ce9c4297836cde7682483" } }
         ],
-        "hall": "Q Block Classroom",
+        "hall": "Q Block Classrooms",
         "eventRules": "Participants must follow organiser instructions and maintain sportsmanship throughout the event.",
         "teamSize": 4,
         "prizePool": "₹5,000",
         "date": { "$date": "2026-02-01T09:00:00.000Z" },
         "closed": false,
-        "timing": "To be announced",
-        "scheduleStart": "10:30",
-        "scheduleEnd": "16:00",
+        "dateAndTime": "Feb 13, 10:00 AM – 3:00 PM",
+        "scheduleStart": "10:00",
+        "scheduleEnd": "15:00",
         "scheduleDay": "day1",
         "youtubeUrl": "",
         "createdAt": { "$date": "2025-12-25T07:37:40.909Z" },
@@ -63,13 +63,13 @@ export const eventsData = [
             { "name": "Karthick J S", "mobile": "9042480747", "_id": { "$oid": "694ce9d2297836cde768248a" } },
             { "name": "Pravith", "mobile": "9843243610", "_id": { "$oid": "694ce9d2297836cde768248b" } }
         ],
-        "hall": "AIR Lab",
+        "hall": "3AI and CSP Labs",
         "eventRules": "Time limit is 2 hours. Participants must follow organiser instructions. Any cheating leads to disqualification. Points are awarded based on accuracy, creativity, and timely completion. Organisers' decisions are final.",
         "teamSize": 3,
         "prizePool": "₹3,000",
         "date": { "$date": "2026-02-01T09:00:00.000Z" },
         "closed": false,
-        "timing": "2 Hours",
+        "dateAndTime": "Feb 14, 9:00 AM – 2:00 PM",
         "scheduleStart": "09:00",
         "scheduleEnd": "15:00",
         "scheduleDay": "day2",
@@ -90,15 +90,15 @@ export const eventsData = [
         "club_id": { "$oid": "69495a6a719d1b3bd5a9e7cf" },
         "rounds": [
             {
-                "title": "Round 1 – Code Charades (The Droid's Transmission)",
+                "title": "Code Charades",
                 "tagline": "Act fast, decode signals, earn your advantage.",
-                "description": "Participants act out computer science-related terms using gestures only, with added constraints from Bug Cards. Points earned convert into strategic advantages for the next round.",
+                "description": "Teams must enact and guess technical terms using only gestures and non-verbal cues. Speed is the key to victory, as points are awarded based on how quickly the team can identify the correct terms to climb the leaderboard.",
                 "_id": { "$oid": "694cec9c297836cde7682491" }
             },
             {
-                "title": "Round 2 – Deal or No Deal: CS Edition (The Asteroid Field)",
+                "title": "Flash Memory",
                 "tagline": "Choose wisely or crash into uncertainty.",
-                "description": "Teams answer a mix of technical and non-technical questions and use advantages earned in Round 1 to select cups containing hidden points, introducing risk-taking and strategy.",
+                "description": "Teams answer questions to earn the right to choose a mystery cup containing hidden points. The twist is that the cup values flash on the screen for mere seconds. This round combines quick thinking with sharp observation to maximize the final score.",
                 "_id": { "$oid": "694cec9c297836cde7682492" }
             }
         ],
@@ -106,13 +106,13 @@ export const eventsData = [
             { "name": "Srimathikalpana T", "mobile": "8122966128", "_id": { "$oid": "694cec9c297836cde7682493" } },
             { "name": "Suryaprakash B", "mobile": "7339143171", "_id": { "$oid": "694cec9c297836cde7682494" } }
         ],
-        "hall": "G Block Classroom",
+        "hall": "G Block Classrooms",
         "eventRules": "Teams must follow organiser instructions. Judging is based on accuracy, time, creativity, team synergy, and effective use of advantages. Organisers' decisions are final.",
         "teamSize": 4,
         "prizePool": "₹4,000",
         "date": { "$date": "2026-02-01T09:00:00.000Z" },
         "closed": false,
-        "timing": "To be announced",
+        "dateAndTime": "Feb 14, 9:00 AM – 2:00 PM",
         "scheduleStart": "09:00",
         "scheduleEnd": "14:00",
         "scheduleDay": "day2",
@@ -133,13 +133,13 @@ export const eventsData = [
         "club_id": { "$oid": "69495a6a719d1b3bd5a9e7cf" },
         "rounds": [
             {
-                "title": "Round 1 – Coding Phase",
+                "title": "Coding Phase",
                 "tagline": "Solve fast, code clean, survive the leaderboard.",
                 "description": "Participants solve 5–6 competitive programming problems ranging from easy to hard on a standard CP platform. Performance is judged on correctness, time taken, and penalties.",
                 "_id": { "$oid": "694ceca6297836cde768249a" }
             },
             {
-                "title": "Round 2 – Hacking Phase",
+                "title": "Hacking Phase",
                 "tagline": "Exploit weaknesses and defend your logic.",
                 "description": "Participants attempt to break other contestants' accepted solutions by identifying edge cases and submitting failing test inputs. Points are awarded for successful hacks and deducted for failed ones.",
                 "_id": { "$oid": "694ceca6297836cde768249b" }
@@ -149,13 +149,16 @@ export const eventsData = [
             { "name": "Dhaarun Abhimanyu S", "mobile": "9790313358", "_id": { "$oid": "694ceca6297836cde768249c" } },
             { "name": "A T Abbilaash", "mobile": "8667093591", "_id": { "$oid": "694ceca6297836cde768249d" } }
         ],
-        "hall": "AIR Lab",
+        "hall": "3AI and AIR Labs",
         "eventRules": "Cheating is prohibited. Points are awarded for successful hacks and reduced for failed hacks or broken defenses. Final scores are calculated using aggregate performance across both rounds. Organisers' decisions are final.",
         "teamSize": 2,
         "prizePool": "₹10,000",
         "date": { "$date": "2026-02-01T09:00:00.000Z" },
         "closed": false,
-        "timing": "To be announced",
+        "dateAndTime": "Feb 13, 10:00 AM – 4:00 PM",
+        "scheduleStart": "10:00",
+        "scheduleEnd": "16:00",
+        "scheduleDay": "day1",
         "youtubeUrl": "",
         "createdAt": { "$date": "2025-12-25T07:49:58.495Z" },
         "updatedAt": { "$date": "2025-12-25T07:49:58.495Z" },
@@ -166,40 +169,57 @@ export const eventsData = [
     {
         "_id": { "$oid": "694ced34297836cde76824a3" },
         "eventId": "EVNT05",
-        "eventName": "Open Quiz",
+        "eventName": "Infinitum Open Quiz",
         "category": "Quiz",
         "oneLineDescription": "Prompt Engineer Battle, Stock Market Quiz, Phygital Escape Quiz",
         "description": "Open Quiz is a multi-round interactive quiz event combining AI creativity, strategic thinking, and immersive problem-solving.",
         "club_id": { "$oid": "69495a6a719d1b3bd5a9e7cd" },
         "rounds": [
             {
-                "title": "Round 1 – Prompt Engineer Battle",
+                "title": "Prompt Engineer Battle",
                 "tagline": "Craft the perfect prompt to beat the AI.",
                 "description": "Teams reverse-engineer AI-generated images by writing prompts that recreate them.",
                 "_id": { "$oid": "694ced34297836cde76824a4" }
             },
             {
-                "title": "Round 2 – Stock Market Quiz",
+                "title": "Stock Market Quiz",
                 "tagline": "Risk, reward, and rapid decisions.",
                 "description": "Teams wager virtual coins on question categories before seeing the question.",
                 "_id": { "$oid": "694ced34297836cde76824a5" }
             },
             {
-                "title": "Round 3 – Phygital Escape Quiz",
+                "title": "Phygital Escape Quiz",
                 "tagline": "Solve clues across worlds to break free.",
                 "description": "Participants solve a series of physical and digital puzzles using QR codes, AR objects, and hidden clues.",
                 "_id": { "$oid": "694ced34297836cde76824a6" }
             }
         ],
         "contacts": [
-            { "name": "Quiz Coordinator", "mobile": "9876543210", "_id": { "$oid": "694ced34297836cde76824a7" } }
-        ],
-        "hall": "Main Auditorium",
+    {
+      "name": "Shelvaaathithyan VK",
+      "mobile": "6381466406",
+      "_id": {
+        "$oid": "694ced34297836cde76824a7"
+      }
+    },
+    {
+      "name": "Logini TS",
+      "mobile": "9842330146",
+      "_id": {
+        "$oid": "694ced34297836cde76824a8"
+      }
+    }
+  ]
+       ,
+        "hall": "D Block",
         "eventRules": "Follow organiser instructions. Maintain integrity. Organisers' decisions are final.",
         "teamSize": 3,
         "date": { "$date": "2026-02-01T09:00:00.000Z" },
         "closed": false,
-        "timing": "To be announced",
+        "dateAndTime": "Feb 13, 1:45 PM – 4:00 PM",
+        "scheduleStart": "13:45",
+        "scheduleEnd": "16:00",
+        "scheduleDay": "day1",
         "prizePool": "₹6,000",
         "image": "/images/events/paper_presentation.png"
     },
@@ -214,26 +234,42 @@ export const eventsData = [
         "club_id": { "$oid": "69495a6a719d1b3bd5a9e7cd" },
         "rounds": [
             {
-                "title": "Round 1: The Optimization Arena",
+                "title": "The Optimization Arena",
                 "tagline": "Turn slow code into lightning-fast solutions.",
                 "description": "Participants receive 3–5 source code files using brute-force approaches.",
                 "_id": { "$oid": "695a38a48baa56af32706870" }
             },
             {
-                "title": "Round 2: Strategic Bidding Challenge",
+                "title": "Strategic Bidding Challenge",
                 "tagline": "Bid smart, code smarter.",
                 "description": "Qualified teams receive virtual currency and bid on questions of varying difficulty.",
                 "_id": { "$oid": "695a38a48baa56af32706871" }
             }
         ],
         "contacts": [
-            { "name": "Tech Lead", "mobile": "9876543211", "_id": { "$oid": "695a38a48baa56af32706872" } }
-        ],
-        "hall": "Computer Lab",
+    {
+      "name": "Harini P",
+      "mobile": "6366203232",
+      "_id": {
+        "$oid": "695a38a48baa56af32706872"
+      }
+    },
+    {
+      "name": "Revanth P",
+      "mobile": "7904316372",
+      "_id": {
+        "$oid": "695a38a48baa56af32706873"
+      }
+    }
+  ],
+        "hall": "GRD and Programming Labs",
         "eventRules": "Individual participation only. Follow coding standards. Organisers' decisions are final.",
         "date": { "$date": "2026-02-01T09:00:00.000Z" },
         "closed": false,
-        "timing": "3 Hours",
+        "timing": "Feb 14, 9:00 AM – 3:00 PM",
+        "scheduleStart": "09:00",
+        "scheduleEnd": "15:00",
+        "scheduleDay": "day2",
         "prizePool": "₹8,000",
         "teamSize": 1,
         "image": "/images/events/paper_presentation.png"
@@ -276,11 +312,14 @@ export const eventsData = [
         "contacts": [
             { "name": "Hackathon Organizer", "mobile": "9876543212", "_id": { "$oid": "695a3d878baa56af32706890" } }
         ],
-        "hall": "Innovation Lab",
+        "hall": "CC Lab",
         "eventRules": "Follow all guidelines. Plagiarism leads to disqualification. Organisers' decisions are final.",
         "date": { "$date": "2026-02-01T09:00:00.000Z" },
         "closed": false,
-        "timing": "2 Days",
+        "dateAndTime": "Feb 13, 10:00 AM – 4:30 PM | Feb 14, 9:00 AM – 3:00 PM",
+        "scheduleStart": "10:00",
+        "scheduleEnd": "16:30",
+        "scheduleDay": "day1",
         "prizePool": "₹25,000",
         "teamSize": 4,
         "image": "/images/events/paper_presentation.png"
