@@ -13,6 +13,7 @@ import { useShutter } from '@/context/ShutterContext';
 function AppWithShutter({ classes, className, children, ...etc }) {
   const { shutterState } = useShutter();
   const pathname = usePathname();
+
   const isShuttering = shutterState === 'closing' || shutterState === 'closed' || shutterState === 'opening';
   const contentRef = useRef(null);
 
@@ -39,7 +40,7 @@ function AppWithShutter({ classes, className, children, ...etc }) {
           window.__appContentElement = ref;
         }}
       >
-        <Header />
+        <Header pathname={pathname} />
         <AppContent>
           {children}
         </AppContent>

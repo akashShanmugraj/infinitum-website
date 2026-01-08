@@ -1,0 +1,51 @@
+.sound-mute-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(199, 32, 113, 0.5);
+    color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    z-index: 9999;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.sound-mute-button:hover {
+    background: rgba(199, 32, 113, 0.3);
+    border-color: rgba(199, 32, 113, 0.8);
+    color: #ffffff;
+    box-shadow: 0 0 15px rgba(199, 32, 113, 0.4);
+    transform: scale(1.05);
+}
+
+.sound-mute-button:active {
+    transform: scale(0.95);
+}
+
+.sound-mute-button svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* Smaller size on mobile */
+@media (max-width: 768px) {
+    .sound-mute-button {
+        width: 36px;
+        height: 36px;
+        bottom: 15px;
+        right: 15px;
+    }
+
+    .sound-mute-button svg {
+        width: 18px;
+        height: 18px;
+    }
+}

@@ -30,7 +30,7 @@ export default function CallbackComponent() {
                     setLoading(false);
                     setTimeout(() => {
                         router.push('/auth?type=login');
-                    }, 3000);
+                    }, 10000);
                     return;
                 }
 
@@ -55,23 +55,30 @@ export default function CallbackComponent() {
     if (error) {
         return (
             <div className="auth-page">
-                <div className="auth-card">
-                    <div className="auth-header">
+                <div className="main-frame">
+                    {/* Inner Frame Border */}
+                    <div className="inner-frame"></div>
+
+                    {/* Side Vertical Lines */}
+                    <div className="side-line-left"></div>
+                    <div className="side-line-right"></div>
+
+                    {/* Content Panel */}
+                    <div className="login-panel">
                         <div className="auth-icon-error">
                             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         </div>
-                        <h1>Authentication Error</h1>
-                        <p style={{ color: '#fca5a5' }}>{error}</p>
+                        <h2 className="login-title">Authentication Error</h2>
+                        <p className="auth-error-text">{error}</p>
+                        <button
+                            onClick={() => router.push('/auth?type=login')}
+                            className="auth-btn"
+                        >
+                            Go to Login
+                        </button>
                     </div>
-                    <button
-                        onClick={() => router.push('/auth?type=login')}
-                        className="auth-btn"
-                        style={{ marginTop: '24px' }}
-                    >
-                        Go to Login
-                    </button>
                 </div>
             </div>
         );
@@ -79,13 +86,21 @@ export default function CallbackComponent() {
 
     return (
         <div className="auth-page">
-            <div className="auth-card">
-                <div className="auth-header">
+            <div className="main-frame">
+                {/* Inner Frame Border */}
+                <div className="inner-frame"></div>
+
+                {/* Side Vertical Lines */}
+                <div className="side-line-left"></div>
+                <div className="side-line-right"></div>
+
+                {/* Content Panel */}
+                <div className="login-panel">
                     <div className="auth-icon-loading">
                         <div className="auth-spinner"></div>
                     </div>
-                    <h1>Processing Authentication</h1>
-                    <p>Please wait while we complete your Google sign-in...</p>
+                    <h2 className="login-title">Processing</h2>
+                    <p className="auth-loading-text">Please wait while we complete your Google sign-in...</p>
                 </div>
             </div>
         </div>

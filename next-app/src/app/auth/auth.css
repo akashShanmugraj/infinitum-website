@@ -75,7 +75,7 @@
     justify-content: center;
     align-items: center;
     padding: 40px 20px;
-    margin: 0;
+    margin: 20;
     font-family: var(--font-orbitron), 'Orbitron', sans-serif;
     background: transparent;
     overflow-y: auto;
@@ -89,6 +89,28 @@
         min-height: auto;
         overflow: hidden;
         padding: 20px;
+    }
+
+    /* RegisterComponent has a long form - make it scrollable and top-aligned */
+    .auth-page:has(.register-card) {
+        overflow-y: auto;
+        align-items: flex-start;
+        padding-top: 80px;
+        scrollbar-width: thin;
+        scrollbar-color: var(--accent-color) transparent;
+    }
+
+    .auth-page:has(.register-card)::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .auth-page:has(.register-card)::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .auth-page:has(.register-card)::-webkit-scrollbar-thumb {
+        background: var(--accent-color);
+        border-radius: 3px;
     }
 }
 
@@ -393,12 +415,13 @@ main>div::-webkit-scrollbar {
     max-width: 520px;
     width: 100%;
     border: 2px solid var(--frame-color);
-    box-shadow: 0 0 40px rgba(199, 32, 113, 0.2);
 }
 
 .register-card {
     max-width: 720px;
     padding: 35px 40px;
+    margin-bottom: 80px;
+    /* Extra bottom margin for scrolling visibility */
 }
 
 .auth-header {
@@ -604,7 +627,7 @@ main>div::-webkit-scrollbar {
     width: 100%;
     height: 2px;
     background: linear-gradient(90deg, transparent, var(--accent-color), var(--yellow-accent), transparent);
-    animation: border-run 2s linear infinite;
+    animation: border-run 5s linear infinite;
 }
 
 @keyframes border-run {
@@ -638,7 +661,8 @@ main>div::-webkit-scrollbar {
     padding: 10px 22px;
     background: transparent;
     border: 1px solid var(--text-dim);
-    border-radius: 25px;
+    border-radius: 0;
+    clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
     color: #ffffff;
     font-family: var(--font-electrolize), 'Electrolize', sans-serif;
     font-size: 11px;
@@ -712,6 +736,80 @@ main>div::-webkit-scrollbar {
     padding: 10px 14px;
     font-size: 11px;
     margin-bottom: 18px;
+    text-align: center;
+    letter-spacing: 0.5px;
+}
+
+/* Callback Component Icons and Text */
+.auth-icon-error {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 20px;
+    border: 2px solid #ff6b6b;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-icon-error svg {
+    width: 30px;
+    height: 30px;
+    color: #ff6b6b;
+}
+
+.auth-icon-loading {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-icon-success {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 20px;
+    border: 2px solid #4ade80;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-icon-success svg {
+    width: 30px;
+    height: 30px;
+    color: #4ade80;
+}
+
+.auth-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(199, 32, 113, 0.2);
+    border-top-color: var(--accent-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.auth-error-text {
+    color: #fca5a5;
+    font-size: 12px;
+    text-align: center;
+    margin-bottom: 20px;
+    letter-spacing: 0.5px;
+}
+
+.auth-loading-text {
+    color: var(--text-dim);
+    font-size: 12px;
     text-align: center;
     letter-spacing: 0.5px;
 }

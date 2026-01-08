@@ -4,6 +4,7 @@ import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { eventService } from '@/services/eventservice';
 import { useAuth } from '@/context/AuthContext';
+import { useSound } from '@/context/SoundContext';
 import { eventsData, workshopsData, papersData } from '@/data/eventsData';
 import { CometCard } from '@/components/ui/comet-card';
 import styles from './EventShowcase.module.css';
@@ -11,6 +12,7 @@ import styles from './EventShowcase.module.css';
 export default function EventShowcase({ sounds, initialEventId }) {
     const searchParams = useSearchParams();
     const { isAuthenticated, user } = useAuth();
+    const { isMuted } = useSound();
     const [category, setCategory] = useState(searchParams.get('category') || 'events');
 
     // Determine effective event ID from props or URL
@@ -35,6 +37,11 @@ export default function EventShowcase({ sounds, initialEventId }) {
     const dropdownRef = useRef(null);
     const [hasInitialSet, setHasInitialSet] = useState(false); // Track if initial event is set
     const [isMobile, setIsMobile] = useState(false); // Track mobile view
+    const [touchStart, setTouchStart] = useState(null);
+    const [touchEnd, setTouchEnd] = useState(null);
+
+    // Minimum swipe distance (in px)
+    const minSwipeDistance = 50;
 
     // Detect mobile screen
     useEffect(() => {
@@ -43,6 +50,31 @@ export default function EventShowcase({ sounds, initialEventId }) {
         window.addEventListener('resize', checkMobile);
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
+
+    // Touch handlers for swipe
+    const onTouchStart = (e) => {
+        setTouchEnd(null);
+        setTouchStart(e.targetTouches[0].clientX);
+    };
+
+    const onTouchMove = (e) => {
+        setTouchEnd(e.targetTouches[0].clientX);
+    };
+
+    const onTouchEnd = () => {
+        if (!touchStart || !touchEnd) return;
+        
+        const distance = touchStart - touchEnd;
+        const isLeftSwipe = distance > minSwipeDistance;
+        const isRightSwipe = distance < -minSwipeDistance;
+        
+        if (isLeftSwipe) {
+            handleEventChange('next');
+        }
+        if (isRightSwipe) {
+            handleEventChange('prev');
+        }
+    };
 
     // Handle effectiveEventId to set correct category
     useEffect(() => {
@@ -142,13 +174,13 @@ export default function EventShowcase({ sounds, initialEventId }) {
                             const list = Array.isArray(res) ? res : (res.papers || res.data || []);
                             registeredIds = list.map(p => p.paperId);
                         }
-                        
+
                         items = items.map(item => ({
                             ...item,
                             isRegistered: registeredIds.includes(item.eventId || item.workshopId || item.paperId)
                         }));
                     } catch (e) {
-                         console.error("Failed to sync registrations", e);
+                        console.error("Failed to sync registrations", e);
                     }
                 }
 
@@ -231,9 +263,11 @@ export default function EventShowcase({ sounds, initialEventId }) {
     }, [isModalOpen, sounds]);
 
     const openModal = () => {
-        const audio = new Audio('/sounds/expand.mp3');
-        audio.volume = 0.5;
-        audio.play().catch(e => console.error("Audio play failed", e));
+        if (!isMuted) {
+            const audio = new Audio('/sounds/expand.mp3');
+            audio.volume = 0.5;
+            audio.play().catch(e => console.error("Audio play failed", e));
+        }
         setIsModalOpen(true);
     };
 
@@ -485,20 +519,18 @@ export default function EventShowcase({ sounds, initialEventId }) {
                 </button>
             </div>
 
-            {/* Event Name with Bracket Frame - Moved outside main layout for alignment */}
+            {/* Event Name with Bracket Frame - Uses corner elements for all 4 corners */}
             <div className={styles.headerContainer}>
                 <div className={styles.eventHeader}>
-                    <div className={styles.bracket}>
-                        <span className={styles.bracketCorner}></span>
-                        <span className={styles.bracketCorner}></span>
-                    </div>
+                    {/* Corner brackets */}
+                    <span className={`${styles.corner} ${styles.cornerTopLeft}`}></span>
+                    <span className={`${styles.corner} ${styles.cornerTopRight}`}></span>
+                    <span className={`${styles.corner} ${styles.cornerBottomLeft}`}></span>
+                    <span className={`${styles.corner} ${styles.cornerBottomRight}`}></span>
+
                     <h1 className={`${styles.eventName} ${isTransitioning ? styles.fadeOut : styles.fadeIn} `}>
                         {currentEvent.eventName}
                     </h1>
-                    <div className={styles.bracket}>
-                        <span className={styles.bracketCorner}></span>
-                        <span className={styles.bracketCorner}></span>
-                    </div>
                 </div>
 
                 {/* Tagline */}
@@ -534,7 +566,12 @@ export default function EventShowcase({ sounds, initialEventId }) {
                 {/* Center Event Display - Now contains primarily the image */}
                 <div className={styles.eventDisplay}>
                     {/* Event Image on Platform */}
-                    <div className={styles.eventImageContainer}>
+                    <div 
+                        className={styles.eventImageContainer}
+                        onTouchStart={isMobile ? onTouchStart : undefined}
+                        onTouchMove={isMobile ? onTouchMove : undefined}
+                        onTouchEnd={isMobile ? onTouchEnd : undefined}
+                    >
                         {/* Mobile Swipe Indicator (Dots) */}
                         <div className={styles.mobileSwipeIndicator}>
                             {events.map((_, index) => (
@@ -762,7 +799,7 @@ export default function EventShowcase({ sounds, initialEventId }) {
                         width: '100%',
                         height: '100%',
                         background: 'rgba(0, 0, 0, 0.7)',
-                        zIndex: 1000,
+                        zIndex: 9999,
                         display: 'flex',
                         justifyContent: 'center',
                         alignItems: 'center',

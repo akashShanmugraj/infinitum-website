@@ -10,14 +10,15 @@ import EventShowcase from '@/components/EventShowcase/EventShowcase';
 const styles = theme => ({
     root: {
         position: 'relative',
-        display: 'block',
-        minHeight: '100vh',
-        overflowY: 'auto',
-        overflowX: 'hidden'
+        display: 'flex',
+        flexDirection: 'column',
+        flex: 1,
+        width: '100%'
     },
     content: {
         position: 'relative',
-        display: 'block'
+        display: 'block',
+        flex: 1
     },
     main: {
         padding: 0,

@@ -19,7 +19,7 @@ const styles = theme => ({
   content: {
     position: 'relative',
     zIndex: 10,
-    padding: [40, 20, 25]
+    padding: [15, 12, 12]
   },
 
   // Logo Section (Top, Centered)
@@ -27,10 +27,10 @@ const styles = theme => ({
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 30
+    marginBottom: 10
   },
   logo: {
-    width: 180,
+    width: 80,
     height: 'auto',
     filter: `drop-shadow(0 0 10px ${theme.color.secondary.main})`,
     transition: 'filter 0.3s ease, transform 0.3s ease',
@@ -44,10 +44,10 @@ const styles = theme => ({
   contactGrid: {
     display: 'grid',
     gridTemplateColumns: 'repeat(5, 1fr)',
-    gap: 25,
+    gap: 10,
     maxWidth: 1200,
-    margin: [0, 'auto', 30],
-    padding: [0, 10]
+    margin: [0, 'auto', 12],
+    padding: [0, 8]
   },
 
   // Individual Contact Section
@@ -56,17 +56,17 @@ const styles = theme => ({
     flexDirection: 'column',
     alignItems: 'center',
     textAlign: 'center',
-    padding: [15, 15]
+    padding: [6, 6]
   },
   sectionTitle: {
     fontFamily: theme.typography.primary,
-    fontSize: 13,
+    fontSize: 10,
     fontWeight: 700,
     color: theme.color.secondary.main,
     textTransform: 'uppercase',
     letterSpacing: '0.12em',
-    marginBottom: 12,
-    paddingBottom: 8,
+    marginBottom: 6,
+    paddingBottom: 4,
     borderBottom: `1px solid ${theme.color.secondary.dark}`,
     width: '100%',
     textShadow: `0 0 8px ${theme.color.secondary.main}`
@@ -77,7 +77,7 @@ const styles = theme => ({
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    marginBottom: 15,
+    marginBottom: 6,
     '&:last-child': {
       marginBottom: 0
     }
@@ -85,24 +85,24 @@ const styles = theme => ({
   contactName: {
     display: 'block',
     fontFamily: theme.typography.secondary,
-    fontSize: 14,
+    fontSize: 11,
     fontWeight: 600,
     color: theme.color.text.primary,
-    marginBottom: 3
+    marginBottom: 2
   },
   contactPosition: {
     display: 'block',
     fontFamily: theme.typography.secondary,
-    fontSize: 11,
+    fontSize: 8,
     color: theme.color.primary.main,
     fontStyle: 'italic',
-    marginBottom: 3,
+    marginBottom: 2,
     letterSpacing: '0.05em'
   },
   contactPhone: {
     display: 'block',
     fontFamily: theme.typography.secondary,
-    fontSize: 13,
+    fontSize: 8,
     color: theme.color.text.secondary,
     letterSpacing: '0.03em',
     transition: 'color 0.3s ease',
@@ -125,7 +125,7 @@ const styles = theme => ({
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 20
+    marginBottom: 12
   },
   socialLinks: {
     margin: 0,
@@ -133,16 +133,16 @@ const styles = theme => ({
   },
   socialLinksItem: {
     padding: 0,
-    height: 26,
-    fontSize: 26
+    height: 20,
+    fontSize: 20
   },
 
   // Legal Section
   legal: {
     margin: [0, 'auto'],
-    padding: [15, 0, 0],
+    padding: [12, 0, 0],
     maxWidth: 600,
-    fontSize: 12,
+    fontSize: 11,
     borderTop: `1px solid ${theme.color.primary.dark}`,
     textAlign: 'center'
   },

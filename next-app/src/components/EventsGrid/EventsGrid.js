@@ -4,6 +4,7 @@ import React, { useMemo, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './EventsGrid.module.css';
 import eventsData from './infinitum-2026.events.json';
+import { useSound } from '@/context/SoundContext';
 
 // Category configuration with colors
 const CATEGORY_CONFIG = {
@@ -75,6 +76,7 @@ const CARD_SIZES = {
 
 export default function EventsGrid() {
     const router = useRouter();
+    const { isMuted } = useSound();
 
     // Audio refs
     const clickSoundRef = useRef(null);
@@ -88,8 +90,9 @@ export default function EventsGrid() {
         hoverSoundRef.current.volume = 0.3;
     }, []);
 
-    // Play sound helper
+    // Play sound helper - respects mute state
     const playSound = (audioRef) => {
+        if (isMuted) return; // Don't play if muted
         if (audioRef.current) {
             audioRef.current.currentTime = 0;
             audioRef.current.play().catch(() => { });

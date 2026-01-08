@@ -4,30 +4,8 @@ import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { authService } from '@/services/authService';
 import '../auth.css';
+import colleges from '@/app/CollegeList';
 
-// College list for India
-const colleges = [
-    'PSG College of Technology',
-    'PSG Institute of Technology and Applied Research',
-    'Coimbatore Institute of Technology',
-    'Government College of Technology, Coimbatore',
-    'Sri Krishna College of Engineering and Technology',
-    'Amrita Vishwa Vidyapeetham',
-    'Kumaraguru College of Technology',
-    'Karpagam College of Engineering',
-    'Sri Ramakrishna Engineering College',
-    'Dr. N.G.P. Institute of Technology',
-    'Bannari Amman Institute of Technology',
-    'Kongu Engineering College',
-    'SNS College of Technology',
-    'Hindusthan College of Engineering and Technology',
-    'Anna University',
-    'Indian Institute of Technology Madras',
-    'National Institute of Technology, Tiruchirappalli',
-    'Vellore Institute of Technology',
-    'SRM Institute of Science and Technology',
-    'Other'
-];
 
 export default function RegisterComponent() {
     const router = useRouter();
@@ -311,7 +289,7 @@ export default function RegisterComponent() {
                             </div>
                         </div>
 
-                        <div className="form-row">
+                        {/* <div className="form-row">
                             <div className="auth-checkbox-field">
                                 <input
                                     type="checkbox"
@@ -322,7 +300,7 @@ export default function RegisterComponent() {
                                 />
                                 <label htmlFor="accomodation">I need accommodation during the event</label>
                             </div>
-                        </div>
+                        </div> */}
                     </div>
 
                     <button type="submit" disabled={loading} className="auth-btn">

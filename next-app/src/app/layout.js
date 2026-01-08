@@ -43,8 +43,10 @@ export const viewport = {
 import StylesProvider from "@/components/ThemeRegistry";
 import ClientTemplate from "@/components/ClientTemplate/ClientTemplate";
 import { AuthProvider } from "@/context/AuthContext";
+import { SoundProvider } from "@/context/SoundContext";
 import { ShutterProvider } from "@/context/ShutterContext";
 import CircularMenu from "@/components/CircularMenu/CircularMenu";
+import SoundMuteButton from "@/components/SoundMuteButton/SoundMuteButton";
 
 export default function RootLayout({ children }) {
   return (
@@ -58,14 +60,17 @@ export default function RootLayout({ children }) {
       </head>
       <body className={`${orbitron.variable} ${electrolize.variable}`} suppressHydrationWarning>
         <StylesProvider>
-          <AuthProvider>
-            <ShutterProvider>
-              <ClientTemplate>
-                {children}
-              </ClientTemplate>
-              <CircularMenu />
-            </ShutterProvider>
-          </AuthProvider>
+          <SoundProvider>
+            <AuthProvider>
+              <ShutterProvider>
+                <ClientTemplate>
+                  {children}
+                </ClientTemplate>
+                <CircularMenu />
+                <SoundMuteButton />
+              </ShutterProvider>
+            </AuthProvider>
+          </SoundProvider>
         </StylesProvider>
       </body>
     </html>

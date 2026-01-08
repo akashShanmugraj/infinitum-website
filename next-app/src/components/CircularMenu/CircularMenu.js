@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { Howl } from 'howler';
 import styles from './CircularMenu.module.css';
+import { useSound } from '@/context/SoundContext';
 
 const MENU_ITEMS = [
     { label: 'Home', icon: 'ri-home-line', href: '/', match: ['/'] },
@@ -46,16 +47,23 @@ export default function CircularMenu() {
     const centerRef = useRef({ x: 0, y: 0 });
     const touchStartRef = useRef({ angle: 0, rotation: 0 }); // For touch rotation
     const isDraggingRef = useRef(false);
+    const { isMuted } = useSound();
+
+    // Helper function to play Howl sounds with mute check
+    const playHowl = useCallback((sound) => {
+        if (isMuted || !sound) return;
+        sound.play();
+    }, [isMuted]);
 
     // Set mounted state to avoid hydration mismatch
     useEffect(() => {
         setIsMounted(true);
-        
+
         // Check if mobile
         const checkMobile = () => setIsMobile(window.innerWidth <= 768);
         checkMobile();
         window.addEventListener('resize', checkMobile);
-        
+
         // Check if user has seen the menu hint before
         const hasSeenHint = localStorage.getItem('menu_hint_seen');
         if (!hasSeenHint) {
@@ -63,13 +71,13 @@ export default function CircularMenu() {
             const timer = setTimeout(() => {
                 setShowHint(true);
             }, 2000);
-            
+
             return () => {
                 clearTimeout(timer);
                 window.removeEventListener('resize', checkMobile);
             };
         }
-        
+
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
@@ -130,20 +138,20 @@ export default function CircularMenu() {
     // Mouse tracking for magnetic pull effect
     const handleMouseMove = useCallback((e) => {
         if (!isOpen) return;
-        
+
         const cx = centerRef.current.x;
         const cy = centerRef.current.y;
         const dx = e.clientX - cx;
         const dy = e.clientY - cy;
         const distance = Math.sqrt(dx * dx + dy * dy);
-        
+
         // Only calculate angle if outside the center button area
         if (distance > 50 && distance < 250) {
             // Calculate angle from center (0 = top, clockwise)
             let angle = Math.atan2(dx, -dy) * (180 / Math.PI);
             if (angle < 0) angle += 360;
             setMouseAngle(angle);
-            
+
             // Determine which segment the mouse is in
             const segmentAngle = 360 / MENU_ITEMS.length;
             // Account for current rotation
@@ -170,16 +178,16 @@ export default function CircularMenu() {
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) {
                 return;
             }
-            
+
             if (e.key === 'q' || e.key === 'Q') {
                 e.preventDefault();
                 toggleMenu();
             }
-            
+
             // Arrow keys and Enter only work when menu is open
             if (isOpen) {
                 const segmentAngle = 360 / MENU_ITEMS.length;
-                
+
                 if (e.key === 'ArrowLeft') {
                     e.preventDefault();
                     // Rotate counterclockwise (previous item) - still forward motion
@@ -187,7 +195,7 @@ export default function CircularMenu() {
                     const stepsForward = (newIndex - selectedIndex + MENU_ITEMS.length) % MENU_ITEMS.length;
                     setSelectedIndex(newIndex);
                     setRotationAngle(rotationAngle - stepsForward * segmentAngle);
-                    if (rotateSound) rotateSound.play();
+                    playHowl(rotateSound);
                 } else if (e.key === 'ArrowRight') {
                     e.preventDefault();
                     // Rotate clockwise (next item) - forward motion
@@ -195,25 +203,25 @@ export default function CircularMenu() {
                     const stepsForward = (newIndex - selectedIndex + MENU_ITEMS.length) % MENU_ITEMS.length;
                     setSelectedIndex(newIndex);
                     setRotationAngle(rotationAngle - stepsForward * segmentAngle);
-                    if (rotateSound) rotateSound.play();
+                    playHowl(rotateSound);
                 } else if (e.key === 'Enter') {
                     e.preventDefault();
                     // Navigate to selected page
-                    handleItemClick({ preventDefault: () => {} }, selectedIndex);
+                    handleItemClick({ preventDefault: () => { } }, selectedIndex);
                 } else if (e.key === 'Escape') {
                     e.preventDefault();
                     setIsOpen(false);
                 }
             }
         };
-        
+
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [isOpen, showHint, selectedIndex]);
 
     const toggleMenu = () => {
-        if (!isOpen && openSound) {
-            openSound.play();
+        if (!isOpen) {
+            playHowl(openSound);
         }
         // Hide hint when user clicks the menu
         if (showHint) {
@@ -231,47 +239,45 @@ export default function CircularMenu() {
 
     const handleItemClick = (e, index) => {
         e.preventDefault(); // Prevent default Link navigation
-        
+
         // If dragging on mobile, don't navigate
         if (isDraggingRef.current) {
             return;
         }
-        
+
         const targetHref = MENU_ITEMS[index].href;
-        
+
         // Calculate rotation using modulo to always go forward
         const segmentAngle = 360 / MENU_ITEMS.length;
-        
+
         // Normalize current rotation to 0-359 range
         const normalizedCurrent = ((rotationAngle % 360) + 360) % 360;
-        
+
         // Calculate current index based on normalized rotation
         const currentNormalizedIndex = Math.round(-normalizedCurrent / segmentAngle) % MENU_ITEMS.length;
-        
+
         // Calculate steps to move forward (always clockwise)
         const stepsForward = (index - currentNormalizedIndex + MENU_ITEMS.length) % MENU_ITEMS.length;
-        
+
         // If no movement needed, don't rotate
         if (stepsForward === 0) {
             router.push(targetHref);
             setIsOpen(false);
             return;
         }
-        
+
         // Always rotate clockwise (negative = clockwise)
         const delta = -stepsForward * segmentAngle;
         const newRotation = rotationAngle + delta;
-        
+
         // Play rotation sound
-        if (rotateSound) {
-            rotateSound.play();
-        }
-        
+        playHowl(rotateSound);
+
         // Animate rotation
         setRotationAngle(newRotation);
         setActiveIndex(index);
         setSelectedIndex(index);
-        
+
         // Wait for rotation animation, then navigate and close
         setTimeout(() => {
             router.push(targetHref);
@@ -291,14 +297,14 @@ export default function CircularMenu() {
 
     const handleTouchStart = (e) => {
         if (!isMobile || !isOpen) return;
-        
+
         const touch = e.touches[0];
         const cx = centerRef.current.x;
         const cy = centerRef.current.y;
         const dx = touch.clientX - cx;
         const dy = touch.clientY - cy;
         const distance = Math.sqrt(dx * dx + dy * dy);
-        
+
         // Only start dragging if touch is on the wheel (not center button)
         if (distance > 40 && distance < 180) {
             touchStartRef.current = {
@@ -311,15 +317,15 @@ export default function CircularMenu() {
 
     const handleTouchMove = (e) => {
         if (!isMobile || !isOpen || touchStartRef.current.angle === undefined) return;
-        
+
         const touch = e.touches[0];
         const currentAngle = getTouchAngle(touch);
         let deltaAngle = currentAngle - touchStartRef.current.angle;
-        
+
         // Handle angle wrap-around
         if (deltaAngle > 180) deltaAngle -= 360;
         if (deltaAngle < -180) deltaAngle += 360;
-        
+
         // Check if we've moved enough to consider it a drag
         if (Math.abs(deltaAngle) > 5) {
             isDraggingRef.current = true;
@@ -330,43 +336,43 @@ export default function CircularMenu() {
                 rotateSound.play();
             }
         }
-        
+
         const newRotation = touchStartRef.current.rotation + deltaAngle;
         setRotationAngle(newRotation);
     };
 
     const handleTouchEnd = () => {
         if (!isMobile || !isOpen) return;
-        
+
         // Snap to nearest segment
         const segmentAngle = 360 / MENU_ITEMS.length;
         const nearestIndex = Math.round(-rotationAngle / segmentAngle) % MENU_ITEMS.length;
         const snappedIndex = (nearestIndex + MENU_ITEMS.length) % MENU_ITEMS.length;
         const snappedRotation = -snappedIndex * segmentAngle;
-        
+
         // Calculate shortest path for snap
         let delta = snappedRotation - rotationAngle;
         while (delta > 180) delta -= 360;
         while (delta < -180) delta += 360;
         const finalRotation = rotationAngle + delta;
-        
+
         if (isDraggingRef.current) {
             // Re-enable transitions before snapping
             setIsDragging(false);
-            
+
             // Play sound when snapping
-            if (rotateSound && Math.abs(delta) > 1) {
-                rotateSound.play();
+            if (Math.abs(delta) > 1) {
+                playHowl(rotateSound);
             }
             setRotationAngle(finalRotation);
             setSelectedIndex(snappedIndex);
         }
-        
+
         // Reset after a short delay
         setTimeout(() => {
             isDraggingRef.current = false;
         }, 100);
-        
+
         touchStartRef.current = { angle: undefined, rotation: 0 };
     };
 
@@ -377,11 +383,11 @@ export default function CircularMenu() {
         const angle = index * segmentAngle; // 0 = top
         // Desktop: (65+195)/2=130, Mobile: (45+135)/2=90
         const radius = isMobile ? 90 : 130;
-        
+
         const rad = (angle - 90) * (Math.PI / 180);
         const x = Math.cos(rad) * radius;
         const y = Math.sin(rad) * radius;
-        
+
         return { x, y, angle };
     };
 
@@ -391,14 +397,14 @@ export default function CircularMenu() {
         const segmentAngle = 360 / total;
         const startAngle = index * segmentAngle - segmentAngle / 2 - 90;
         const endAngle = startAngle + segmentAngle;
-        
+
         // Desktop vs Mobile radii
         const innerRadius = isMobile ? 45 : 65;
         const outerRadius = isMobile ? 135 : 195;
-        
+
         const startRad = startAngle * (Math.PI / 180);
         const endRad = endAngle * (Math.PI / 180);
-        
+
         const x1 = Math.cos(startRad) * innerRadius;
         const y1 = Math.sin(startRad) * innerRadius;
         const x2 = Math.cos(startRad) * outerRadius;
@@ -407,9 +413,9 @@ export default function CircularMenu() {
         const y3 = Math.sin(endRad) * outerRadius;
         const x4 = Math.cos(endRad) * innerRadius;
         const y4 = Math.sin(endRad) * innerRadius;
-        
+
         const largeArc = segmentAngle > 180 ? 1 : 0;
-        
+
         return `M ${x1} ${y1} L ${x2} ${y2} A ${outerRadius} ${outerRadius} 0 ${largeArc} 1 ${x3} ${y3} L ${x4} ${y4} A ${innerRadius} ${innerRadius} 0 ${largeArc} 0 ${x1} ${y1} Z`;
     };
 
@@ -425,7 +431,7 @@ export default function CircularMenu() {
 
             {/* First-time user hint tooltip - click to dismiss */}
             {showHint && (
-                <div 
+                <div
                     className={styles.menuHint}
                     onClick={() => {
                         setShowHint(false);
@@ -439,18 +445,18 @@ export default function CircularMenu() {
 
             {/* Pie Menu - only render after mount to avoid hydration mismatch */}
             {isMounted && (
-                <div 
+                <div
                     className={styles.pieMenu}
                     onTouchStart={handleTouchStart}
                     onTouchMove={handleTouchMove}
                     onTouchEnd={handleTouchEnd}
                 >
                     {/* Rotating container for segments and icons */}
-                    <div 
+                    <div
                         className={`${styles.rotatingContainer} ${isDraggingRef.current ? styles.dragging : ''}`}
                         style={{ transform: `rotate(${rotationAngle}deg)` }}
                     >
-                        <svg 
+                        <svg
                             viewBox={isMobile ? "-180 -180 360 360" : "-210 -210 420 420"}
                             className={styles.pieSvg}
                         >
@@ -459,7 +465,7 @@ export default function CircularMenu() {
                                 const isHovered = hoveredIndex === index;
                                 const isActive = activeIndex === index;
                                 const isSelected = selectedIndex === index;
-                                
+
                                 return (
                                     <g key={index}>
                                         {/* Segment path */}
@@ -468,7 +474,7 @@ export default function CircularMenu() {
                                             className={`${styles.segment} ${isHovered ? styles.segmentHovered : ''} ${isActive ? styles.segmentActive : ''} ${isSelected ? styles.segmentSelected : ''}`}
                                             onClick={(e) => handleItemClick(e, index)}
                                         />
-                                        
+
                                         {/* Segment border */}
                                         <path
                                             d={getSegmentPath(index)}
@@ -485,7 +491,7 @@ export default function CircularMenu() {
                             const isHovered = hoveredIndex === index;
                             const isActive = activeIndex === index;
                             const isSelected = selectedIndex === index;
-                            
+
                             return (
                                 <a
                                     key={index}

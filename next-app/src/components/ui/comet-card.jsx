@@ -15,8 +15,8 @@ export const CometCard = ({
   translateDepth = 15,
   className,
   children,
-  borderColor = "rgba(199, 32, 113, 0.6)",
-  glowColor = "rgba(199, 32, 113, 0.4)",
+  borderColor = "rgba(199, 32, 113, 0.35)",
+  glowColor = "rgba(199, 32, 113, 0.2)",
 }) => {
   const ref = useRef(null);
   const sounds = useContext(SoundsContext);
@@ -48,7 +48,7 @@ export const CometCard = ({
   const glareX = useTransform(mouseXSpring, [-0.5, 0.5], [0, 100]);
   const glareY = useTransform(mouseYSpring, [-0.5, 0.5], [0, 100]);
 
-  const glareBackground = useMotionTemplate`radial-gradient(circle at ${glareX}% ${glareY}%, rgba(199, 32, 113, 0.6) 0%, rgba(199, 32, 113, 0.3) 40%, rgba(199, 32, 113, 0) 70%)`;
+  const glareBackground = useMotionTemplate`radial-gradient(circle at ${glareX}% ${glareY}%, rgba(199, 32, 113, 0.3) 0%, rgba(199, 32, 113, 0.15) 40%, rgba(199, 32, 113, 0) 70%)`;
 
   // Idle floating animation for desktop to hint at interactivity
   useEffect(() => {
@@ -167,11 +167,11 @@ export const CometCard = ({
       >
         {/* Outer glow border - disabled */}
         <div
-          className="absolute -inset-[3px] rounded-[18px]"
+          className="absolute -inset-[2px] rounded-[18px]"
           style={{
             background: `linear-gradient(135deg, ${borderColor}, transparent 50%, ${glowColor})`,
-            filter: "none",
-            opacity: 0,
+            filter: isHovered ? "blur(4px)" : "blur(2px)",
+            opacity: isHovered ? 0.6 : 0.35,
             transition: "filter 0.3s ease, opacity 0.3s ease",
           }}
         />
@@ -189,43 +189,10 @@ export const CometCard = ({
           {children}
         </div>
 
-        {/* Subtle animated border pulse */}
-        <motion.div
-          className="pointer-events-none absolute -inset-[1px] rounded-[17px]"
-          style={{
-            border: `1px solid ${borderColor}`,
-            opacity: 0.5,
-            zIndex: 3,
-          }}
-          animate={{
-            opacity: [0.3, 0.7, 0.3],
-          }}
-          transition={{
-            duration: 2,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
+        {/* Animated border pulse - REMOVED */}
       </motion.div>
 
-      {/* Glare circle - disabled */}
-      <motion.div
-        className="pointer-events-none rounded-full"
-        style={{
-          position: "absolute",
-          top: "100%",
-          left: 0,
-          right: 0,
-          background: glareBackground,
-          width: "100%",
-          height: "80px",
-          marginTop: isMobile ? "80px" : "280px",
-          opacity: 0,
-          filter: "blur(15px)",
-          zIndex: -1,
-        }}
-        transition={{ duration: 0.3 }}
-      />
+      {/* Glare circle - REMOVED */}
     </div>
   );
 };

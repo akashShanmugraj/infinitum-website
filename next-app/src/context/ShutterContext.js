@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useCallback, useRef } from 'react';
+import { useSound } from '@/context/SoundContext';
 
 const ShutterContext = createContext(null);
 
@@ -9,9 +10,12 @@ export function ShutterProvider({ children }) {
     const midpointCallbackRef = useRef(null);
     const completeCallbackRef = useRef(null);
     const audioRef = useRef(null);
+    const { isMuted } = useSound();
 
     // Play shutter sound using shutter.mp3
     const playShutterSound = useCallback(() => {
+        if (isMuted) return; // Don't play if muted
+
         try {
             if (!audioRef.current) {
                 audioRef.current = new Audio('/sounds/shutter.mp3');
@@ -22,7 +26,7 @@ export function ShutterProvider({ children }) {
         } catch (e) {
             // Audio not supported, continue silently
         }
-    }, []);
+    }, [isMuted]);
 
     const triggerShutter = useCallback((onMidpoint, onComplete) => {
         if (shutterState !== 'idle') return;

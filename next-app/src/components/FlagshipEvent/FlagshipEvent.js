@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import styles from './FlagshipEvent.module.css';
 import { eventService } from '@/services/eventservice';
+import { useSound } from '@/context/SoundContext';
 
 // Static event data
 const EVENT_DATA = {
@@ -22,6 +23,7 @@ export default function FlagshipEvent() {
     const [flagship, setFlagship] = useState({});
     const [thooral, setThooral] = useState({})
     const cardRef = useRef(null);
+    const { isMuted } = useSound();
 
     // Audio refs
     const clickSoundRef = useRef(null);
@@ -99,8 +101,9 @@ export default function FlagshipEvent() {
         hoverSoundRef.current.volume = 0.3;
     }, []);
 
-    // Play sound helper
+    // Play sound helper - respects mute state
     const playSound = (audioRef) => {
+        if (isMuted) return; // Don't play if muted
         if (audioRef.current) {
             audioRef.current.currentTime = 0;
             audioRef.current.play().catch(() => { });

@@ -12,6 +12,7 @@ import RegisterComponent from './components/RegisterComponent';
 import CallbackComponent from './components/CallbackComponent';
 import VerifyEmailComponent from './components/VerifyEmailComponent';
 import ForgotPasswordComponent from './components/ForgotPasswordComponent';
+import ResetPasswordComponent from './components/ResetPasswordComponent';
 import './auth.css';
 
 function AuthContent() {
@@ -66,6 +67,8 @@ function AuthContent() {
                 return <VerifyEmailComponent />;
             case 'forgot-password':
                 return <ForgotPasswordComponent />;
+            case 'reset-password':
+                return <ResetPasswordComponent />;
             default:
                 return <LoginComponent />;
         }

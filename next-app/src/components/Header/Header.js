@@ -20,7 +20,8 @@ class Component extends React.Component {
     audio: PropTypes.object.isRequired,
     sounds: PropTypes.object.isRequired,
     className: PropTypes.any,
-    children: PropTypes.any
+    children: PropTypes.any,
+    pathname: PropTypes.string
   };
 
   constructor() {
@@ -39,17 +40,70 @@ class Component extends React.Component {
   }
 
   componentDidMount() {
-    this.draw();
+    // Pass callback to draw to ensure shapes are ready before entering
+    this.draw(() => {
+      const { energy } = this.props;
+      if (energy && (energy.entering || energy.entered)) {
+        this.enter();
+      }
+    });
+
+    if (typeof ResizeObserver !== 'undefined') {
+      this.resizeObserver = new ResizeObserver(() => {
+        this.draw();
+      });
+      if (this.element) {
+        this.resizeObserver.observe(this.element);
+      }
+    }
 
     window.addEventListener('resize', this.onResize);
     window.addEventListener('shutter-state-change', this.onShutterChange);
+
+    // Poll for URL changes to handle client-side navigation robustly
+    this.lastUrl = window.location.href;
+    this.checkUrlInterval = setInterval(this.checkUrlChange, 100);
+  }
+
+  componentDidUpdate(prevProps) {
+    // Re-trigger visibility check on route change
+    if (this.props.pathname !== prevProps.pathname) {
+      this.draw(() => {
+        this.enter();
+      });
+    }
   }
 
   componentWillUnmount() {
     this.stop();
 
+    if (this.checkUrlInterval) {
+      clearInterval(this.checkUrlInterval);
+    }
+
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
+    }
+
     window.removeEventListener('resize', this.onResize);
     window.removeEventListener('shutter-state-change', this.onShutterChange);
+  }
+
+  checkUrlChange = () => {
+    const currentUrl = window.location.href;
+    if (currentUrl !== this.lastUrl) {
+      const lastPathname = new URL(this.lastUrl).pathname;
+      const currentPathname = new URL(currentUrl).pathname;
+      this.lastUrl = currentUrl;
+
+      // Only trigger animation if the pathname changed, not just query params
+      // This prevents re-animation when switching between auth components
+      if (currentPathname !== lastPathname) {
+        this.draw(() => {
+          this.enter();
+        });
+      }
+    }
   }
 
   onResize = () => {
@@ -72,11 +126,21 @@ class Component extends React.Component {
     });
   }
 
-  draw() {
+  draw(callback) {
     const { theme } = this.props;
     const { small } = getViewportRange();
     const { shutterExtension } = this.state;
+    // Safety check for element
+    if (!this.element) return;
+
     const width = this.element.offsetWidth;
+
+    // If width is 0 (layout not ready), defer the callback
+    if (width === 0) {
+      if (callback) this.pendingCallback = callback;
+      return;
+    }
+
     const height = this.element.offsetHeight;
     const totalHeight = height + shutterExtension;
 
@@ -133,7 +197,14 @@ class Component extends React.Component {
 
     const shapes = [ground, line1, slash1, line2, line3, slash2, line4];
 
-    this.setState({ shapes });
+    this.setState({ shapes }, () => {
+      if (callback) callback();
+      if (this.pendingCallback) {
+        const cb = this.pendingCallback;
+        this.pendingCallback = null;
+        cb();
+      }
+    });
   }
 
   getDurationEnter() {

@@ -18,6 +18,8 @@ export default function ForgotPasswordComponent() {
         setLoading(true);
 
         try {
+            // Store email in localStorage for reset password component
+            localStorage.setItem('reset_password_email', email);
             await authService.forgotPassword({ email });
             setSuccess(true);
         } catch (err) {
