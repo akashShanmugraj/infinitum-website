@@ -108,7 +108,7 @@ export const eventsData = [
         ],
         "hall": "G Block Classrooms",
         "eventRules": "Teams must follow organiser instructions. Judging is based on accuracy, time, creativity, team synergy, and effective use of advantages. Organisers' decisions are final.",
-        "teamSize": 4,
+        "teamSize": 3,
         "prizePool": "₹4,000",
         "date": { "$date": "2026-02-01T09:00:00.000Z" },
         "closed": false,
