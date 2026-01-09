@@ -221,7 +221,7 @@ export const eventsData = [
         "scheduleEnd": "16:00",
         "scheduleDay": "day1",
         "prizePool": "₹6,000",
-        "image": "/images/events/openquiz.png"
+        "image": "/images/events/infinitumopenquiz.png"
     },
 
     {
