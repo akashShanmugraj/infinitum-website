@@ -299,11 +299,31 @@ export default function RegisterComponent() {
                                     type="text"
                                     id="department"
                                     name="department"
+                                    list="department-options"
                                     value={formData.department}
                                     onChange={handleChange}
-                                    placeholder="e.g., Computer Science"
+                                    placeholder="Select or type your department"
                                     required
+                                    autoComplete="off"
                                 />
+                                <datalist id="department-options">
+                                    <option value="Automobile Engineering" />
+                                    <option value="Biomedical Engineering" />
+                                    <option value="Civil Engineering" />
+                                    <option value="Computer Science and Engineering" />
+                                    <option value="Computer Science and Engineering (AI and ML)" />
+                                    <option value="Electrical and Electronics Engineering" />
+                                    <option value="Electronics and Communication Engineering" />
+                                    <option value="Instrumentation and Control Engineering" />
+                                    <option value="Mechanical Engineering" />
+                                    <option value="Metallurgical Engineering" />
+                                    <option value="Production Engineering" />
+                                    <option value="Robotics and Automation" />
+                                    <option value="Bio Technology" />
+                                    <option value="Fashion Technology" />
+                                    <option value="Information Technology" />
+                                    <option value="Textile Technology" />
+                                </datalist>
                             </div>
 
                             <div className="auth-field">
