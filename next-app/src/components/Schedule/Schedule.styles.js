@@ -8,7 +8,7 @@ export const styles = theme => ({
     overflowY: 'auto',
     color: theme.color.text.main,
     fontFamily: theme.typography.secondary,
-    padding: '50px 0 20px 0',
+    padding: '20px 0 20px 0',
     background: `linear-gradient(180deg, ${rgba(0, 0, 0, 0)} 0%, ${rgba(0, 0, 0, 0.3)} 100%)`,
     minHeight: 'auto', // Let content define height
     display: 'flex',
