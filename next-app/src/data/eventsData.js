@@ -171,56 +171,42 @@ export const eventsData = [
         "eventId": "EVNT05",
         "eventName": "Open Quiz",
         "category": "Quiz",
-        "oneLineDescription": "Prompt Engineer Battle, Stock Market Quiz, Phygital Escape Quiz",
-        "description": "Open Quiz is a multi-round interactive quiz event combining AI creativity, strategic thinking, and immersive problem-solving.",
+        "oneLineDescription": "Tech in Movies, Wheel of Tech, Code Auction",
+        "description": "INFINITUM – Open Quiz is a multi-round technical quiz event designed to test participants’ technology awareness, core computer science knowledge, and strategic decision-making through engaging quiz-based rounds.",
         "club_id": { "$oid": "69495a6a719d1b3bd5a9e7cd" },
         "rounds": [
             {
-                "title": "Prompt Engineer Battle",
-                "tagline": "Craft the perfect prompt to beat the AI.",
-                "description": "Teams reverse-engineer AI-generated images by writing prompts that recreate them.",
+                "title": "Tech Spectrum",
+                "tagline": "Spot the tech. Spin the wheel. Stay in the game.",
+                "description": "Round 1 consists of two games conducted sequentially. Game 1: Tech in Movies – Teams watch short movie clips and identify technologies, computer science concepts, or futuristic ideas shown. Game 2: Wheel of Tech – Teams spin a wheel to answer questions from various computer science domains and difficulty levels. Scores from both games are combined, and the top teams qualify for the final round.",
                 "_id": { "$oid": "694ced34297836cde76824a4" }
             },
             {
-                "title": "Stock Market Quiz",
-                "tagline": "Risk, reward, and rapid decisions.",
-                "description": "Teams wager virtual coins on question categories before seeing the question.",
+                "title": "BidRush",
+                "tagline": "Bid smart. Predict right. Win big.",
+                "description": "Qualified teams compete in the Code Auction (Bidding Round). Teams analyze code snippets, place bids based on confidence, and predict outputs or correct behavior. Correct answers earn bid points, while incorrect answers result in point deductions. The team with the highest final score is declared the winner, with a rapid-fire tie-breaker in case of a tie.",
                 "_id": { "$oid": "694ced34297836cde76824a5" }
-            },
-            {
-                "title": "Phygital Escape Quiz",
-                "tagline": "Solve clues across worlds to break free.",
-                "description": "Participants solve a series of physical and digital puzzles using QR codes, AR objects, and hidden clues.",
-                "_id": { "$oid": "694ced34297836cde76824a6" }
             }
         ],
         "contacts": [
             {
                 "name": "Shelvaaathithyan VK",
                 "mobile": "6381466406",
-                "_id": {
-                    "$oid": "694ced34297836cde76824a7"
-                }
+                "_id": { "$oid": "694ced34297836cde76824a7" }
             },
             {
                 "name": "Logini TS",
                 "mobile": "9842330146",
-                "_id": {
-                    "$oid": "694ced34297836cde76824a8"
-                }
+                "_id": { "$oid": "694ced34297836cde76824a8" }
             }
-        ]
-        ,
+        ],
         "hall": "D Block",
-        "eventRules": "Follow organiser instructions. Maintain integrity. Organisers' decisions are final.",
+        "eventRules": "Participants must follow organiser instructions at all times. Fair play and integrity are mandatory. Organisers’ decisions are final.",
         "teamSize": 3,
         "date": { "$date": "2026-02-01T09:00:00.000Z" },
         "closed": false,
         "dateAndTime": "Feb 13, 1:45 PM – 4:00 PM",
-        "scheduleStart": "13:45",
-        "scheduleEnd": "16:00",
-        "scheduleDay": "day1",
-        "prizePool": "₹6,000",
+
         "image": "/images/events/infinitumopenquiz.png"
     },
 

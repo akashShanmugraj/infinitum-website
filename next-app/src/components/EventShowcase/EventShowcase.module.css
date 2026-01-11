@@ -1367,30 +1367,45 @@
 .closeBtn {
   position: absolute;
   top: 15px;
-  /* Moved up */
-  right: 15px;
-  /* Moved right */
-  width: 44px;
-  height: 44px;
-  border: 2px solid #c72071;
-  background: rgba(10, 10, 15, 0.9);
-  /* Solid background to hide overlapping lines */
-  border-radius: 50%;
-  color: #c72071;
-  font-size: 24px;
-  cursor: pointer;
-  display: flex;
+  left: 30px;
+  /* Positioned in top left for desktop */
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  padding: 12px 24px;
+  border: 2px solid #c72071;
+  clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+  color: #c72071;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  cursor: pointer;
   transition: all 0.3s ease;
+  background: transparent;
   z-index: 10;
+  overflow: hidden;
+}
+
+.closeBtn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.closeBtn:hover::before {
+  left: 100%;
 }
 
 .closeBtn:hover {
-  background: #c72071;
-  color: #fff;
-  box-shadow: 0 0 25px rgba(199, 32, 113, 0.7);
-  transform: rotate(90deg);
+  transform: translateY(-4px);
+  color: white;
 }
 
 .modalContent {
@@ -1815,7 +1830,7 @@
     position: relative;
     top: auto;
     transform: none;
-    margin-bottom: 20px;
+    margin-bottom: -15px;
     align-self: center;
   }
 
@@ -1825,11 +1840,16 @@
     position: relative;
   }
 
+  .modalGlowRing {
+    inset: -10px;
+  }
+
   .modal {
     padding: 20px;
-    padding-top: 60px;
+    padding-top: 70px;
     max-height: 85vh;
     overflow-y: auto;
+    margin-top: 30px;
   }
 
   .modalInfo {
@@ -2028,5 +2048,21 @@
   .modalRounds,
   .modalContacts {
     width: 100%;
+  }
+
+  .closeBtn {
+    top: 15px;
+    left: auto;
+    right: 15px;
+    /* Keep in top right for mobile */
+    width: 44px;
+    padding: 0;
+    border-radius: 50%;
+    clip-path: none;
+    font-size: 24px;
+  }
+
+  .closeBtn:hover {
+    transform: rotate(90deg);
   }
 }

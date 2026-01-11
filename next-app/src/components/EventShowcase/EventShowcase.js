@@ -696,7 +696,7 @@ export default function EventShowcase({ sounds, initialEventId }) {
                 <div className={styles.overlay} onClick={handleBackdropClick}>
                     <div className={styles.modal}>
                         <button className={styles.closeBtn} onClick={closeModal}>
-                            ✕
+                            {isMobile ? '✕' : 'Back'}
                         </button>
 
                         <div className={styles.modalContent}>
