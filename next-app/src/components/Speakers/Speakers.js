@@ -35,7 +35,7 @@ const SPEAKERS_DATA = [
         type: "Speakers"
     },
     {
-        image: "/images/speakers/Supriya.jpeg",
+        image: "/images/speakers/supriya.jpg",
         name: "Supriya Rajamanickam",
         designation: "Senior Technical Leader, Cisco Systems",
         type: "Speakers"
