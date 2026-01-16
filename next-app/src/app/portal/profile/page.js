@@ -774,6 +774,35 @@ const styles = theme => {
                 transform: 'scale(1.05)',
                 color: '#fff !important'
             }
+        },
+        // Mobile-only logout button container at bottom of page
+        mobileLogoutContainer: {
+            display: 'none',
+            '@media (max-width: 767px)': {
+                display: 'flex',
+                order: 99, // Ensure it appears last
+                justifyContent: 'center',
+                padding: '20px 0',
+                marginTop: 10
+            }
+        },
+        mobileLogoutBtn: {
+            background: theme.color.secondary.main,
+            color: '#fff',
+            border: 'none',
+            padding: '14px 40px',
+            fontFamily: theme.typography.primary,
+            fontWeight: 700,
+            fontSize: '0.9rem',
+            textTransform: 'uppercase',
+            letterSpacing: 1,
+            cursor: 'pointer',
+            clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)',
+            boxShadow: `0 0 20px ${theme.color.secondary.main}60`,
+            transition: 'all 0.3s ease',
+            '&:active': {
+                transform: 'scale(0.95)'
+            }
         }
     };
 };
@@ -1007,7 +1036,14 @@ class ProfilePage extends React.Component {
         const { classes } = this.props;
         const { user, loading, registeredEvents, isQRExpanded, isUploadingId, viewIdUrl, isIdViewerOpen, idCardPreviewUrl, idCardPreviewType, isIdLoading, idToUpload, idToUploadPreview, idToUploadType, openAccordion, isMobile } = this.state;
 
-        if (loading || !user) return null;
+        // Show loading placeholder with minimum height to prevent footer from jumping
+        if (loading || !user) {
+            return (
+                <div className={classes.root} style={{ minHeight: '100vh' }}>
+                    {/* Loading placeholder - maintains page height */}
+                </div>
+            );
+        }
 
         // Category colors inspired by EventsGrid
         const categoryColors = {
@@ -1125,7 +1161,7 @@ class ProfilePage extends React.Component {
                                                     <div className={classes.fieldValue} style={{ whiteSpace: 'normal', lineHeight: 1.4 }}>{user.college}</div>
                                                 </div>
                                             </div>
-                                        </div> 
+                                        </div>
 
                                         {/* QR Side (Desktop only now) */}
                                         {!isMobile && (
@@ -1163,7 +1199,7 @@ class ProfilePage extends React.Component {
                                             <div className={classes.dataField}>
                                                 <label className={classes.fieldLabel}>General Fee</label>
                                                 {user.generalFeePaid ? (
-                                                     <span className={classes.statusPaid}><span>●</span> Paid</span>
+                                                    <span className={classes.statusPaid}><span>●</span> Paid</span>
                                                 ) : (
                                                     <span className={classes.statusPending}>Pending</span>
                                                 )}
@@ -1265,6 +1301,16 @@ class ProfilePage extends React.Component {
                             </div>
 
                             {/* Action Buttons */}
+                        </div>
+
+                        {/* Mobile-only Logout Button */}
+                        <div className={classes.mobileLogoutContainer}>
+                            <button
+                                className={classes.mobileLogoutBtn}
+                                onClick={this.handleLogout}
+                            >
+                                Logout
+                            </button>
                         </div>
                     </div>
 

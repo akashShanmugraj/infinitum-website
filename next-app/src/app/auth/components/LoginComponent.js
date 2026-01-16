@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import '../auth.css';
 
@@ -12,7 +12,11 @@ export default function LoginComponent() {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const router = useRouter();
+    const searchParams = useSearchParams();
     const { login } = useAuth();
+
+    // Get callback URL from query params for redirect after login
+    const callbackUrl = searchParams.get('callbackUrl');
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -27,7 +31,8 @@ export default function LoginComponent() {
 
         try {
             await login({ email, password });
-            router.push('/portal/profile');
+            // Redirect to callback URL if present, otherwise to profile
+            router.push(callbackUrl || '/portal/profile');
         } catch (err) {
             setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
         } finally {

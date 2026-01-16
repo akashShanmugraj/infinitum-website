@@ -78,6 +78,20 @@ class Component extends React.PureComponent {
     const newSubscription = { ref, callback, energy };
 
     this.subscribers = [...this.subscribers, newSubscription];
+
+    // Fix: If parent context is already entered, immediately trigger animation for this subscriber
+    // This handles late-joining subscribers on client-side navigation
+    const contextStatus = this.context?.status;
+    if (contextStatus === ENTERED || contextStatus === ENTERING) {
+      // Use setTimeout to ensure DOM is ready
+      setTimeout(() => {
+        this.updateSubscriber(newSubscription, ENTERING);
+        const duration = energy.duration?.enter || 250;
+        setTimeout(() => {
+          this.updateSubscriber(newSubscription, ENTERED);
+        }, duration);
+      }, 0);
+    }
   }
 
   unsubscribe = ref => {

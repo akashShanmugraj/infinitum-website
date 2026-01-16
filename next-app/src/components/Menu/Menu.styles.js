@@ -37,7 +37,7 @@ const styles = theme => ({
   },
   link: {
     overflow: 'visible',
-    opacity: ({ scheme }) => scheme === SCHEME_EXPAND ? 0 : 1,
+    opacity: 0, // Start hidden - animation reveals. Works for both refresh and navigation.
     backgroundColor: 'transparent',
     clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)',
     border: `2px solid ${theme.color.secondary.main}`,
@@ -48,6 +48,13 @@ const styles = theme => ({
     '&:hover, &:focus': {
       backgroundColor: theme.color.secondary.main,
       color: '#ffffff'
+    }
+  },
+
+  // Logout button - hidden on mobile, shown on desktop
+  logoutLink: {
+    '@media (max-width: 767px)': {
+      display: 'none !important'
     }
   },
 

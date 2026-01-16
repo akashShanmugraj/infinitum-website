@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import cx from 'classnames';
 import anime from 'animejs';
@@ -31,6 +31,9 @@ class Component extends React.PureComponent {
     user: PropTypes.object,
     logout: PropTypes.func,
     isAuthPage: PropTypes.bool,
+    isProfilePage: PropTypes.bool,  // Used to hide logout on mobile for profile page
+    isEventsPage: PropTypes.bool,  // Used to hide auth buttons on mobile for events page
+    isMobile: PropTypes.bool,  // Mobile screen detection
     openPreRegModal: PropTypes.func,
     showPreRegButton: PropTypes.bool  // When false and pre-reg enabled, hide buttons entirely
   };
@@ -50,10 +53,19 @@ class Component extends React.PureComponent {
 
   componentDidMount() {
     window.addEventListener('route-change', this.onURLChange);
+
+    // Fix: If parent energy is already entering/entered on mount (e.g. after navigation),
+    // trigger the sequence animation immediately
+    const { energy } = this.props;
+    if (energy && (energy.entering || energy.entered)) {
+      this.setState({ showSecuence: true });
+      // Also trigger the button opacity animation
+      setTimeout(() => this.enter(), 0);
+    }
   }
 
   componentDidUpdate(prevProps) {
-    const { energy } = this.props;
+    const { energy, user } = this.props;
 
     if (prevProps.energy.status !== energy.status) {
       if (energy.entering) {
@@ -61,6 +73,14 @@ class Component extends React.PureComponent {
       } else if (energy.exiting) {
         this.setState({ showSecuence: false }); // eslint-disable-line react/no-did-update-set-state
       }
+    }
+
+    // Fix: When user becomes authenticated after mount (login redirect),
+    // the logout button wasn't there when enter() ran in componentDidMount.
+    // Trigger animation now that the button exists.
+    if (!prevProps.user && user && (energy.entering || energy.entered)) {
+      this.setState({ showSecuence: true }); // eslint-disable-line react/no-did-update-set-state
+      setTimeout(() => this.enter(), 0);
     }
   }
 
@@ -156,6 +176,9 @@ class Component extends React.PureComponent {
       user,
       logout,
       isAuthPage,
+      isProfilePage,
+      isEventsPage,
+      isMobile,
       openPreRegModal,
       showPreRegButton,
       ...etc
@@ -171,7 +194,8 @@ class Component extends React.PureComponent {
     };
 
     const isAuthenticated = user != null;
-    const showAuthButtons = !isAuthenticated && !isAuthPage;
+    // Hide auth buttons on mobile when on events page
+    const showAuthButtons = !isAuthenticated && !isAuthPage && !(isMobile && isEventsPage);
 
     return (
       <Secuence
@@ -184,7 +208,8 @@ class Component extends React.PureComponent {
           {...etc}
         >
           {isAuthenticated ? (
-            <>
+            // Hide logout button on mobile for events page and profile page
+            !(isMobile && (isEventsPage || isProfilePage)) && (
               <button
                 className={cx(classes.item, classes.link)}
                 onMouseEnter={() => sounds.hover.play()}
@@ -197,7 +222,7 @@ class Component extends React.PureComponent {
                   Logout
                 </Text>
               </button>
-            </>
+            )
           ) : showAuthButtons ? (
             isPreRegistrationEnabled ? (
               // If showPreRegButton is true, show Pre-Register button; otherwise hide entirely
@@ -248,7 +273,20 @@ const MenuWithAuth = React.forwardRef((props, ref) => {
   const { openModal } = usePreRegistration();
   const pathname = usePathname();
   const isAuthPage = pathname?.startsWith('/auth');
-  return <Component {...props} user={user} logout={logout} isAuthPage={isAuthPage} openPreRegModal={openModal} ref={ref} />;
+  const isProfilePage = pathname?.startsWith('/portal/profile');
+  const isEventsPage = pathname?.startsWith('/events');
+
+  // Mobile detection
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth <= 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  return <Component {...props} user={user} logout={logout} isAuthPage={isAuthPage} isProfilePage={isProfilePage} isEventsPage={isEventsPage} isMobile={isMobile} openPreRegModal={openModal} ref={ref} />;
 });
 
 MenuWithAuth.displayName = 'Menu';

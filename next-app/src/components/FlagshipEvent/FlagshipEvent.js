@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import styles from './FlagshipEvent.module.css';
 import { eventService } from '@/services/eventservice';
 import { useSound } from '@/context/SoundContext';
@@ -26,15 +27,17 @@ export default function FlagshipEvent() {
     const [isRegistered, setIsRegistered] = useState(false);
     const [notification, setNotification] = useState({
         isOpen: false,
-        type: '', // 'confirm', 'success', 'error'
+        type: '', // 'confirm', 'success', 'error', 'login'
         title: '',
         message: '',
-        onConfirm: null
+        onConfirm: null,
+        showLoginButton: false
     });
     const cardRef = useRef(null);
     const { isMuted } = useSound();
     const { isAuthenticated } = useAuth();
     const { openModal: openPreRegModal } = usePreRegistration();
+    const router = useRouter();
 
     // Audio refs
     const clickSoundRef = useRef(null);
@@ -229,10 +232,11 @@ export default function FlagshipEvent() {
         if (!isAuthenticated && !token) {
             setNotification({
                 isOpen: true,
-                type: 'error',
+                type: 'login',
                 title: 'Login Required',
                 message: 'Please login to register for this event.',
-                onConfirm: () => closeNotification()
+                onConfirm: () => closeNotification(),
+                showLoginButton: true
             });
             return;
         }
@@ -277,10 +281,11 @@ export default function FlagshipEvent() {
             if (error.response?.status === 401) {
                 setNotification({
                     isOpen: true,
-                    type: 'error',
+                    type: 'login',
                     title: 'Login Required',
                     message: 'Please login to register for this event.',
-                    onConfirm: () => closeNotification()
+                    onConfirm: () => closeNotification(),
+                    showLoginButton: true
                 });
             } else if (error.response?.status === 400 && msg.toLowerCase().includes("general fee")) {
                 setNotification({
@@ -595,7 +600,7 @@ export default function FlagshipEvent() {
                         </p>
 
                         {/* Buttons */}
-                        <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+                        <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
                             {notification.type === 'confirm' && (
                                 <button
                                     onClick={closeNotification}
@@ -616,29 +621,57 @@ export default function FlagshipEvent() {
                                     Cancel
                                 </button>
                             )}
-                            <button
-                                onClick={notification.onConfirm}
-                                style={{
-                                    padding: '12px 24px',
-                                    background: notification.type === 'success'
-                                        ? 'linear-gradient(135deg, #00E676, #00C853)'
-                                        : 'linear-gradient(135deg, #c72071, #8b164f)',
-                                    border: 'none',
-                                    borderRadius: '6px',
-                                    color: '#fff',
-                                    fontFamily: 'Orbitron, sans-serif',
-                                    fontSize: '0.9rem',
-                                    cursor: 'pointer',
-                                    textTransform: 'uppercase',
-                                    letterSpacing: '0.05em',
-                                    boxShadow: notification.type === 'success'
-                                        ? '0 4px 20px rgba(0, 230, 118, 0.4)'
-                                        : '0 4px 20px rgba(199, 32, 113, 0.4)',
-                                    transition: 'all 0.3s ease',
-                                }}
-                            >
-                                {notification.type === 'confirm' ? 'Confirm' : 'OK'}
-                            </button>
+                            {notification.showLoginButton && (
+                                <button
+                                    onClick={() => {
+                                        closeNotification();
+                                        // Navigate to login with current page as callback URL
+                                        const currentUrl = typeof window !== 'undefined' ? window.location.pathname + window.location.search : '/';
+                                        router.push(`/auth?type=login&callbackUrl=${encodeURIComponent(currentUrl)}`);
+                                    }}
+                                    style={{
+                                        padding: '12px 24px',
+                                        background: 'linear-gradient(135deg, #c72071, #8b164f)',
+                                        border: 'none',
+                                        borderRadius: '6px',
+                                        color: '#fff',
+                                        fontFamily: 'Orbitron, sans-serif',
+                                        fontSize: '0.9rem',
+                                        cursor: 'pointer',
+                                        textTransform: 'uppercase',
+                                        letterSpacing: '0.05em',
+                                        boxShadow: '0 4px 20px rgba(199, 32, 113, 0.4)',
+                                        transition: 'all 0.3s ease',
+                                    }}
+                                >
+                                    Login
+                                </button>
+                            )}
+                            {!notification.showLoginButton && (
+                                <button
+                                    onClick={notification.onConfirm}
+                                    style={{
+                                        padding: '12px 24px',
+                                        background: notification.type === 'success'
+                                            ? 'linear-gradient(135deg, #00E676, #00C853)'
+                                            : 'linear-gradient(135deg, #c72071, #8b164f)',
+                                        border: 'none',
+                                        borderRadius: '6px',
+                                        color: '#fff',
+                                        fontFamily: 'Orbitron, sans-serif',
+                                        fontSize: '0.9rem',
+                                        cursor: 'pointer',
+                                        textTransform: 'uppercase',
+                                        letterSpacing: '0.05em',
+                                        boxShadow: notification.type === 'success'
+                                            ? '0 4px 20px rgba(0, 230, 118, 0.4)'
+                                            : '0 4px 20px rgba(199, 32, 113, 0.4)',
+                                        transition: 'all 0.3s ease',
+                                    }}
+                                >
+                                    {notification.type === 'confirm' ? 'Confirm' : 'OK'}
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>
