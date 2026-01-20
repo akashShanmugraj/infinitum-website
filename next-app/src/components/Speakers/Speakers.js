@@ -71,6 +71,12 @@ const SPEAKERS_DATA = [
         type: "Speakers"
     },
     {
+        image: "/images/speakers/kapil.jpeg",
+        name: "Kapil",
+        designation: "Founder/CEO, dossier.nexus",
+        type: "Speakers"
+    },
+    {
         image: "/images/speakers/karthick.jpg",
         name: "Karthik Ramachandran",
         designation: "Program Manager, Bosch Global Software Technologies",
@@ -92,12 +98,6 @@ const SPEAKERS_DATA = [
         image: "/images/speakers/raghuram.jpg",
         name: "Raghu ram",
         designation: "Staff Software Architect, GE Healthcare",
-        type: "Speakers"
-    },
-    {
-        image: "/images/speakers/lovelynrose.jpg",
-        name: "Lovelyn Rose",
-        designation: "Founder and CEO, Lysa Solutions",
         type: "Speakers"
     },
     {
