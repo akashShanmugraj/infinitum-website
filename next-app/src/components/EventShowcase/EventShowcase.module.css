@@ -1094,6 +1094,8 @@
     /* Allow text wrapping on mobile */
     word-wrap: break-word;
     overflow-wrap: break-word;
+    word-break: normal;
+    /* Prevent colon and punctuation from breaking to new line */
     text-align: center;
     padding: 0 10px;
     /* Add horizontal padding to prevent edge clipping */
