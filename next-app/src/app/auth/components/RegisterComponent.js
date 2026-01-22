@@ -383,6 +383,8 @@ export default function RegisterComponent() {
                                     value={formData.referral}
                                     onChange={handleChange}
                                     placeholder="Optional"
+                                    readOnly={!!localStorage.getItem('club_referral_code')}
+                                    className={localStorage.getItem('club_referral_code') ? 'readonly-input' : ''}
                                 />
                             </div>
 
