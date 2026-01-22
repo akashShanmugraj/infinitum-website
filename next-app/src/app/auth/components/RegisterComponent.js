@@ -40,9 +40,25 @@ export default function RegisterComponent() {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+    // Invisible Referral Tracking: Grab and Strip Logic
+    useEffect(() => {
+        const ref = searchParams.get('ref');
+        
+        if (ref) {
+            // Save referral code to localStorage
+            localStorage.setItem('club_referral_code', ref);
+            
+            // Remove the 'ref' query parameter from URL without page reload
+            const newUrl = new URL(window.location.href);
+            newUrl.searchParams.delete('ref');
+            window.history.replaceState({}, '', newUrl.toString());
+        }
+    }, [searchParams]);
+
     useEffect(() => {
         const storedEmail = localStorage.getItem('registration_email');
         const storedGoogleId = localStorage.getItem('registration_googleId');
+        const storedReferralCode = localStorage.getItem('club_referral_code');
 
         if (!storedEmail) {
             router.push('/auth?type=register');
@@ -53,7 +69,9 @@ export default function RegisterComponent() {
             ...prev,
             email: storedEmail || '',
             googleId: storedGoogleId || '',
-            source: source || 'email'
+            source: source || 'email',
+            // Pre-fill referral field if exists in localStorage
+            referral: storedReferralCode || prev.referral
         }));
     }, [source, router]);
 
@@ -98,6 +116,9 @@ export default function RegisterComponent() {
         setLoading(true);
 
         try {
+            // Check localStorage for referral code (invisible referral tracking)
+            const storedReferralCode = localStorage.getItem('club_referral_code');
+            
             const registrationData = {
                 email: formData.email,
                 name: formData.name,
@@ -105,7 +126,8 @@ export default function RegisterComponent() {
                 college: formData.college,
                 department: formData.department,
                 year: parseInt(formData.year),
-                referral: formData.referral,
+                // Use stored referral code if form field is empty
+                referral: formData.referral || storedReferralCode || '',
                 accomodation: formData.accomodation,
                 discoveryMethod: formData.discoveryMethod,
                 source: formData.source
@@ -119,8 +141,10 @@ export default function RegisterComponent() {
 
             await authService.register(registrationData);
 
+            // Clean up localStorage after successful registration
             localStorage.removeItem('registration_email');
             localStorage.removeItem('registration_googleId');
+            localStorage.removeItem('club_referral_code');
 
             router.push('/portal/profile');
         } catch (err) {
@@ -359,6 +383,8 @@ export default function RegisterComponent() {
                                     value={formData.referral}
                                     onChange={handleChange}
                                     placeholder="Optional"
+                                    readOnly={!!localStorage.getItem('club_referral_code')}
+                                    className={localStorage.getItem('club_referral_code') ? 'readonly-input' : ''}
                                 />
                             </div>
 
