@@ -35,10 +35,14 @@ export default function EventShowcase({ sounds, initialEventId }) {
     }, [searchParams]);
 
     const [activeEventIndex, setActiveEventIndex] = useState(0);
+    const activeEventIndexRef = useRef(activeEventIndex);
+    useEffect(() => { activeEventIndexRef.current = activeEventIndex; }, [activeEventIndex]);
+    
     const [isTransitioning, setIsTransitioning] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const dropdownRef = useRef(null);
+    const prevCategoryRef = useRef(category);
     const [hasInitialSet, setHasInitialSet] = useState(false); // Track if initial event is set
     const [isMobile, setIsMobile] = useState(false); // Track mobile view
     const [touchStart, setTouchStart] = useState(null);
@@ -117,6 +121,9 @@ export default function EventShowcase({ sounds, initialEventId }) {
     // Load events based on category
     useEffect(() => {
         console.log('🔄 Category changed to:', category);
+        const isCategoryChange = prevCategoryRef.current !== category;
+        prevCategoryRef.current = category;
+
         const loadEvents = async () => {
             setIsLoading(true);
             console.log('📥 Loading events for category:', category);
@@ -192,7 +199,7 @@ export default function EventShowcase({ sounds, initialEventId }) {
                 setEvents(items);
 
                 // Deep Linking Logic
-                if (effectiveEventId && !hasInitialSet) {
+                if (effectiveEventId) {
                     const idx = items.findIndex(e =>
                         (e.eventId === effectiveEventId) ||
                         (e.workshopId === effectiveEventId) ||
@@ -222,9 +229,16 @@ export default function EventShowcase({ sounds, initialEventId }) {
                             if (items.length > 0) setActiveEventIndex(0);
                         }
                     }
-                } else if (!hasInitialSet) {
-                    // No deep link, normal load
-                    setActiveEventIndex(0);
+                } else {
+                    // No deep link URL parameter.
+                    // If the category has changed, we must reset the index to 0.
+                    // Otherwise, we only reset if it's the very first load or if index is invalid.
+                    if (isCategoryChange || !hasInitialSet) {
+                        setActiveEventIndex(0);
+                    } else if (activeEventIndexRef.current >= items.length) {
+                        // Safety check: ensure index is valid if data changed (e.g. fewer items)
+                        setActiveEventIndex(0);
+                    }
                 }
 
             } catch (error) {
@@ -234,7 +248,7 @@ export default function EventShowcase({ sounds, initialEventId }) {
             }
         };
         loadEvents();
-    }, [category, effectiveEventId, hasInitialSet, isAuthenticated]); // Added dependencies
+    }, [category, effectiveEventId, hasInitialSet, isAuthenticated]); // Removed activeEventIndex to avoid re-fetching on swipe
 
     // Fetch full details - No longer needed as all data is hardcoded
     useEffect(() => {
@@ -484,7 +498,12 @@ export default function EventShowcase({ sounds, initialEventId }) {
                             e.stopPropagation();
                             console.log('🖱️ Dropdown item clicked:', cat);
                             if (sounds?.click) sounds.click.play();
-                            setCategory(cat);
+
+                            // Always navigate to the clean category URL
+                            // This ensures we leave specific event pages (like /events/ID) 
+                            // and go to the list view of the new category
+                            router.push(`/events?category=${cat}`);
+
                             setIsDropdownOpen(false);
                         }}
                     >
@@ -519,8 +538,8 @@ export default function EventShowcase({ sounds, initialEventId }) {
                         style={{
                             background: currentEvent.isRegistered ? 'transparent' : undefined,
                             cursor: currentEvent.isRegistered ? 'default' : 'pointer',
-                            borderColor: currentEvent.isRegistered ? '#00E676' : undefined,
-                            color: currentEvent.isRegistered ? '#00E676' : undefined,
+                            borderColor: currentEvent.isRegistered ? '#B0B0B0' : undefined,
+                            color: currentEvent.isRegistered ? '#B0B0B0' : undefined,
                             boxShadow: currentEvent.isRegistered ? 'none' : undefined,
                         }}
                     >
@@ -543,13 +562,13 @@ export default function EventShowcase({ sounds, initialEventId }) {
                     <span className={`${styles.corner} ${styles.cornerBottomLeft}`}></span>
                     <span className={`${styles.corner} ${styles.cornerBottomRight}`}></span>
 
-                    <h1 className={`${styles.eventName} ${isTransitioning ? styles.fadeOut : styles.fadeIn} `}>
+                    <h1 className={`${styles.eventName} ${isTransitioning ? styles.fadeOut : ''} `}>
                         {currentEvent.eventName}
                     </h1>
                 </div>
 
                 {/* Tagline */}
-                <p className={`${styles.tagline} ${isTransitioning ? styles.fadeOut : styles.fadeIn} `}>
+                <p className={`${styles.tagline} ${isTransitioning ? styles.fadeOut : ''} `}>
                     {currentEvent.oneLineDescription}
                 </p>
             </div>
@@ -638,7 +657,7 @@ export default function EventShowcase({ sounds, initialEventId }) {
                         )}
 
                         <CometCard className={styles.eventImageCard}>
-                            <div className={`${styles.eventImage} ${isTransitioning ? styles.fadeOut : styles.fadeIn} `} onClick={openModal} style={{ cursor: 'pointer' }}>
+                            <div className={`${styles.eventImage} ${isTransitioning ? styles.fadeOut : ''} `} onClick={openModal} style={{ cursor: 'pointer' }}>
                                 {currentEvent.image && (
                                     <Image
                                         key={currentEvent.eventId || currentEvent.workshopId || currentEvent.paperId}
@@ -665,7 +684,7 @@ export default function EventShowcase({ sounds, initialEventId }) {
                     {events.length > 1 && (
                         <div className={styles.eventCounterContainer}>
                             <span className={styles.eventCounter}>
-                                Event {activeEventIndex + 1} of {events.length}
+                                {category === 'workshops' ? 'Workshop' : category === 'papers' ? 'Paper' : 'Event'} {activeEventIndex + 1} of {events.length}
                             </span>
                         </div>
                     )}
@@ -729,11 +748,16 @@ export default function EventShowcase({ sounds, initialEventId }) {
                                     width={350}
                                     height={350}
                                     className={styles.modalPoster}
-                                    unoptimized
+                                    loading="eager"
+                                    priority
+                                    placeholder="blur"
+                                    blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzUwIiBoZWlnaHQ9IjM1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMWEwMjBiIi8+PC9zdmc+"
                                 />
                             </div>
                             <div className={styles.modalInfo}>
-                                <span className={styles.modalLabel}>{currentEvent.category || 'EVENT'}</span>
+                                <span className={styles.modalLabel}>
+                                    {category === 'workshops' ? 'WORKSHOP' : category === 'papers' ? 'PAPER PRESENTATION' : (currentEvent.category || 'EVENT')}
+                                </span>
                                 <h2 className={styles.modalTitle}>{currentEvent.eventName}</h2>
                                 {currentEvent.oneLineDescription && (
                                     <p className={styles.modalOneLiner}>{currentEvent.oneLineDescription}</p>
@@ -1016,6 +1040,59 @@ export default function EventShowcase({ sounds, initialEventId }) {
                     </div>
                 </div>
             )}
+            {/* Preload images for smoother transitions - All Categories */}
+            <div style={{ display: 'none' }} aria-hidden="true">
+                {/* Preload current category events */}
+                {events.map((event, index) => {
+                    const img = event.image || DEFAULT_EVENT_IMAGE;
+                    if (!img || index === activeEventIndex) return null;
+                    return (
+                        <Image
+                            key={`preload-current-${event.eventId || event.workshopId || event.paperId || index}`}
+                            src={img}
+                            alt=""
+                            width={400}
+                            height={400}
+                            loading="eager"
+                            unoptimized={false}
+                        />
+                    );
+                })}
+                {/* Preload Workshops */}
+                {workshopsData.map((w, index) => {
+                    // Avoid duplicating if already in 'events' (which it won't be, but good to be safe if Logic changes)
+                    // Only preload if not currently viewing workshops (otherwise above loop handles it)
+                    if (category === 'workshops') return null;
+                    const img = w.image || DEFAULT_EVENT_IMAGE;
+                    return (
+                        <Image
+                            key={`preload-workshop-${w.workshopId || index}`}
+                            src={img}
+                            alt=""
+                            width={400}
+                            height={400}
+                            loading="lazy" // Use lazy for non-critical, or eager if user wants INSTANT switch
+                            unoptimized={false}
+                        />
+                    )
+                })}
+                {/* Preload Papers */}
+                {papersData.map((p, index) => {
+                    if (category === 'papers') return null;
+                    const img = p.image || DEFAULT_EVENT_IMAGE;
+                    return (
+                        <Image
+                            key={`preload-paper-${p.paperId || index}`}
+                            src={img}
+                            alt=""
+                            width={400}
+                            height={400}
+                            loading="lazy"
+                            unoptimized={false}
+                        />
+                    )
+                })}
+            </div>
         </div>
     );
 }

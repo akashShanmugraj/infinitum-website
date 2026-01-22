@@ -16,6 +16,7 @@ import Sponsors from '@/components/Sponsors';
 import Speakers from '@/components/Speakers';
 import Collaboration from '@/components/Collaboration';
 import { HomeFooter } from '@/components/HomeFooter';
+import FAQ from '@/components/FAQ';
 
 // Original had: import { Secuence } from '../components/Secuence';
 // Note: I need to ensure import paths are correct. @/ is src/
@@ -78,6 +79,23 @@ const styles = theme => {
       whiteSpace: 'nowrap',
       '@media (max-width: 480px)': {
         fontSize: '1.5rem',
+        letterSpacing: '0.1em'
+      }
+    },
+    subtitle: {
+      fontFamily: theme.typography.primary,
+      fontSize: '1.5rem',
+      fontWeight: 700,
+      fontStyle: 'italic',
+      letterSpacing: '0.15em',
+      textTransform: 'uppercase',
+      color: 'yellow',
+      textAlign: 'center',
+      marginBottom: 30,
+      textShadow: `0 0 12px ${theme.color.secondary.main}, 0 0 25px ${theme.color.secondary.dark}`,
+      whiteSpace: 'nowrap',
+      '@media (max-width: 480px)': {
+        fontSize: '0.7rem',
         letterSpacing: '0.1em'
       }
     },
@@ -145,6 +163,8 @@ class Component extends React.Component {
                 className={classes.brand}
                 onLinkStart={this.onLinkStart}
               />
+              
+              <span className={classes.subtitle}>National level technical symposium</span>
               <span className={classes.dates}>FEB 13 & 14, 2026</span>
               {/* <Link
               href='/schedule'
@@ -166,6 +186,7 @@ class Component extends React.Component {
             <EventsGrid />
             <Speakers />
             <Sponsors />
+            <FAQ />
             <HomeFooter />
           </div>
         </SecuenceComponent>

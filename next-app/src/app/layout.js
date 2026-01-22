@@ -56,6 +56,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <script async src="https://vercel-umami-roan.vercel.app/script.js" data-website-id="b2b707b1-166d-4651-b54f-af7bb33bc3d7"></script>
         <link
           rel="stylesheet"
           href="//cdn.materialdesignicons.com/3.0.39/css/materialdesignicons.min.css"
