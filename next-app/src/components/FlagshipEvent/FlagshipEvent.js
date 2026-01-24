@@ -43,7 +43,8 @@ const EVENT_DATA = {
     contacts: [
         { name: "Ishwarya S", mobile: "9342868277" },
         { name: "Akash S", mobile: "9943803882" },
-        { name: "Shree Raghavan", mobile: "6385786223" }
+        { name: "Sreeraghavan", mobile: "6385786223" },
+        {name: "Lohith S", mobile: "9488125100"}
     ],
     teamSize: 4,
     closed: false,
