@@ -34,6 +34,7 @@ const contactSections = [
     {
         title: 'Accommodation (Boys)',
         contacts: [
+            { name : 'Shelvaaathithyan VK', phone: '+91 6381466406'},
             { name: 'Rohith Sarvesaa', phone: '+91 8610272023' },
             { name: 'Karthick Saravanan', phone: '+91 8056936690' },
         ]

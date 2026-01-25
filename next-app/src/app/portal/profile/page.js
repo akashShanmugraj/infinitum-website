@@ -6,11 +6,23 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import api from '@/services/api';
 import axios from 'axios';
+import { useSearchParams, useRouter } from 'next/navigation';
 
 import { withStyles } from '@/tools/withStyles';
 import { Secuence as SecuenceComponent } from '@/components/Secuence';
 import { Button } from '@/components/Button';
 import colleges from '@/app/CollegeList';
+
+// Accommodation Instructions
+const ACCOMMODATION_INSTRUCTIONS = [
+    "Accommodation is provided on a first-come, first-served basis. Only the first 100 registrations will be accommodated (50 boys and 50 girls).",
+    "The accommodation fee is ₹250 per night (₹500 for 2 nights). Payment QR code will be provided at the time of check-in.",
+    "Food will not be provided. Participants must arrange their own meals.",
+    "Accommodation is provided in PSG IMSR hostel. Two beds with bedsheets will be provided per room.",
+    "Strictly no drinking, smoking, or any prohibited substances. Violators will be disqualified from the event and their respective institutions will be informed.",
+    "Participants must follow all hostel rules and regulations during their stay.",
+    "Please carry a valid college ID card for verification at check-in."
+];
 
 // --- Mobile Quick Actions Component ---
 const MobileActions = ({ user, classes, onQrClick, onIdClick, onViewIdClick, isIdLoading, viewIdUrl, idToUpload }) => (
@@ -881,6 +893,194 @@ const styles = theme => {
                 border: `1px solid ${theme.color.secondary.main}`
             }
         },
+        // Tab Navigation Styles
+        tabNavigation: {
+            display: 'flex',
+            gap: 0,
+            marginBottom: 20,
+            borderBottom: '1px solid rgba(255,255,255,0.1)',
+            '@media (max-width: 960px)': {
+                marginBottom: 15
+            }
+        },
+        tab: {
+            padding: '12px 24px',
+            background: 'transparent',
+            border: 'none',
+            borderBottom: '2px solid transparent',
+            color: '#888',
+            fontFamily: theme.typography.primary,
+            fontSize: '0.9rem',
+            fontWeight: 600,
+            textTransform: 'uppercase',
+            letterSpacing: 1,
+            cursor: 'pointer',
+            transition: 'all 0.3s ease',
+            '&:hover': {
+                color: '#fff',
+                background: 'rgba(255,255,255,0.05)'
+            },
+            '@media (max-width: 960px)': {
+                padding: '10px 16px',
+                fontSize: '0.75rem'
+            }
+        },
+        tabActive: {
+            color: theme.color.secondary.main,
+            borderBottomColor: theme.color.secondary.main,
+            '&:hover': {
+                color: theme.color.secondary.main
+            }
+        },
+        // Accommodation Section Styles
+        accommodationPanel: {
+            background: 'rgba(10, 5, 10, 0.7)',
+            border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: 12,
+            padding: 20,
+            marginBottom: 15
+        },
+        instructionsList: {
+            listStyle: 'none',
+            padding: 0,
+            margin: 0,
+            '& li': {
+                position: 'relative',
+                paddingLeft: 20,
+                marginBottom: 12,
+                color: '#ccc',
+                fontSize: '0.85rem',
+                lineHeight: 1.5,
+                '&::before': {
+                    content: '"▸"',
+                    position: 'absolute',
+                    left: 0,
+                    color: theme.color.secondary.main
+                }
+            }
+        },
+        accommodationForm: {
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 15,
+            marginTop: 20
+        },
+        formRow: {
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gap: 15
+        },
+        formField: {
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 6
+        },
+        formLabel: {
+            fontSize: '0.75rem',
+            color: '#aaa',
+            textTransform: 'uppercase',
+            letterSpacing: 0.5
+        },
+        registeredBadge: {
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6,
+            padding: '6px 12px',
+            background: 'rgba(0, 255, 100, 0.15)',
+            border: '1px solid #00ff64',
+            borderRadius: 20,
+            color: '#00ff64',
+            fontSize: '0.8rem',
+            fontWeight: 600
+        },
+        detailsGrid: {
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+            gap: 15,
+            marginTop: 15
+        },
+        detailItem: {
+            background: 'rgba(0,0,0,0.3)',
+            padding: 12,
+            borderRadius: 8,
+            border: '1px solid rgba(255,255,255,0.05)'
+        },
+        detailLabel: {
+            display: 'block',
+            fontSize: '0.65rem',
+            color: '#888',
+            textTransform: 'uppercase',
+            marginBottom: 4,
+            letterSpacing: 0.5
+        },
+        detailValue: {
+            color: '#fff',
+            fontSize: '0.9rem',
+            fontWeight: 500
+        },
+        // Success Popup Styles
+        successOverlay: {
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0,0,0,0.85)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+            backdropFilter: 'blur(5px)'
+        },
+        successPopup: {
+            background: 'linear-gradient(135deg, #0a050a 0%, #1a0a1a 100%)',
+            border: '2px solid #00ff64',
+            borderRadius: 16,
+            padding: '40px 50px',
+            textAlign: 'center',
+            maxWidth: 400,
+            boxShadow: '0 0 40px rgba(0,255,100,0.3)'
+        },
+        successIcon: {
+            width: 70,
+            height: 70,
+            borderRadius: '50%',
+            background: 'rgba(0,255,100,0.15)',
+            border: '3px solid #00ff64',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: '0 auto 20px',
+            fontSize: '2rem',
+            color: '#00ff64'
+        },
+        successTitle: {
+            fontSize: '1.4rem',
+            fontWeight: 700,
+            color: '#00ff64',
+            marginBottom: 10
+        },
+        successMessage: {
+            fontSize: '0.9rem',
+            color: '#ccc',
+            marginBottom: 25,
+            lineHeight: 1.5
+        },
+        successBtn: {
+            background: '#00ff64',
+            color: '#000',
+            border: 'none',
+            padding: '12px 40px',
+            borderRadius: 8,
+            fontSize: '0.9rem',
+            fontWeight: 700,
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            '&:hover': {
+                transform: 'scale(1.05)',
+                boxShadow: '0 0 20px rgba(0,255,100,0.5)'
+            }
+        },
     };
 };
 
@@ -906,6 +1106,19 @@ class ProfilePage extends React.Component {
             isEditing: false,
             formData: {},
             isSaving: false,
+            // Accommodation state
+            activeTab: 'profile',
+            accommodationData: null,
+            accommodationLoading: true,
+            accommodationRegistered: false,
+            accommodationForm: {
+                residentialAddress: '',
+                city: '',
+                gender: ''
+            },
+            accommodationSubmitting: false,
+            accommodationError: null,
+            accommodationSuccess: false, // Success popup state
         };
         this.fileInputRef = React.createRef();
     }
@@ -916,6 +1129,10 @@ class ProfilePage extends React.Component {
     }
 
     componentDidMount() {
+        // Set initial tab from URL query param (passed via props)
+        if (this.props.initialTab) {
+            this.setState({ activeTab: this.props.initialTab });
+        }
         this.checkAuth();
         const checkMobile = () => this.setState({ isMobile: window.innerWidth <= 960 });
         checkMobile();
@@ -930,7 +1147,10 @@ class ProfilePage extends React.Component {
         try {
             const { authService } = await import('@/services/authService');
             const response = await authService.getProfile();
-            this.setState({ user: response.user, loading: false });
+            this.setState({ user: response.user, loading: false }, () => {
+                // Fetch accommodation after user is set
+                this.fetchAccommodation();
+            });
 
             // Fetch registered events after successful auth
             if (response.user) {
@@ -964,6 +1184,109 @@ class ProfilePage extends React.Component {
         } catch (error) {
             console.error("Failed to fetch registered events", error);
         }
+    };
+
+    // Accommodation Methods
+    fetchAccommodation = async () => {
+        const { user } = this.state;
+        if (!user?.uniqueId) return;
+
+        try {
+            const response = await api.get(`/api/acc/accommodation/uniqueId/${user.uniqueId}`);
+            console.log(response);
+            if (response.data.success && response.data.data?.accommodation) {
+                this.setState({
+                    accommodationData: response.data.data.accommodation,
+                    accommodationRegistered: true,
+                    accommodationLoading: false
+                });
+            } else {
+                this.setState({ accommodationLoading: false });
+            }
+        } catch (error) {
+            // 404 means not registered - this is expected
+            if (error.response?.status === 404) {
+                this.setState({ accommodationLoading: false, accommodationRegistered: false });
+            } else {
+                this.setState({
+                    accommodationLoading: false,
+                    accommodationError: 'Failed to check accommodation status'
+                });
+            }
+        }
+    };
+
+    handleAccommodationFormChange = (e) => {
+        const { name, value } = e.target;
+        this.setState(prevState => ({
+            accommodationForm: {
+                ...prevState.accommodationForm,
+                [name]: value
+            }
+        }));
+    };
+
+    registerAccommodation = async () => {
+        const { user, accommodationForm } = this.state;
+
+        // Validate required fields
+        if (!accommodationForm.residentialAddress || !accommodationForm.city || !accommodationForm.gender) {
+            alert('Please fill in all required fields');
+            return;
+        }
+
+        this.setState({ accommodationSubmitting: true, accommodationError: null });
+
+        try {
+            const payload = {
+                name: user.name,
+                email: user.email,
+                uniqueId: user.uniqueId,
+                college: user.college,
+                phone: user.phone,
+                residentialAddress: accommodationForm.residentialAddress,
+                city: accommodationForm.city,
+                gender: accommodationForm.gender,
+                amount: 0,
+                optin: true
+            };
+            const response = await api.post('/api/acc/accommodation/register', payload);
+
+            if (response.data.success) {
+                this.setState({
+                    accommodationData: response.data.data,
+                    accommodationRegistered: true,
+                    accommodationSubmitting: false,
+                    accommodationSuccess: true // Show success popup
+                });
+            }
+        } catch (error) {
+            let errorMessage = 'Failed to register accommodation';
+            if (error.response?.status === 409) {
+                errorMessage = 'You have already registered for accommodation';
+                // Re-fetch to get the existing data
+                this.fetchAccommodation();
+            } else if (error.response?.data?.message) {
+                errorMessage = error.response.data.message;
+            }
+            this.setState({
+                accommodationSubmitting: false,
+                accommodationError: errorMessage
+            });
+            alert(errorMessage);
+        }
+    };
+
+    handleTabChange = (tab) => {
+        this.setState({ activeTab: tab });
+        // Update URL without reload
+        const url = new URL(window.location);
+        if (tab === 'profile') {
+            url.searchParams.delete('tab');
+        } else {
+            url.searchParams.set('tab', tab);
+        }
+        window.history.pushState({}, '', url);
     };
 
     handleLogout = async () => {
@@ -1160,7 +1483,7 @@ class ProfilePage extends React.Component {
 
     render() {
         const { classes } = this.props;
-        const { user, loading, registeredEvents, isQRExpanded, isUploadingId, viewIdUrl, isIdViewerOpen, idCardPreviewUrl, idCardPreviewType, isIdLoading, idToUpload, idToUploadPreview, idToUploadType, openAccordion, isMobile, isEditing, formData, isSaving } = this.state;
+        const { user, loading, registeredEvents, isQRExpanded, isUploadingId, viewIdUrl, isIdViewerOpen, idCardPreviewUrl, idCardPreviewType, isIdLoading, idToUpload, idToUploadPreview, idToUploadType, openAccordion, isMobile, isEditing, formData, isSaving, activeTab, accommodationData, accommodationLoading, accommodationRegistered, accommodationForm, accommodationSubmitting, accommodationError, accommodationSuccess } = this.state;
 
         // Show loading placeholder with minimum height to prevent footer from jumping
         if (loading || !user) {
@@ -1246,264 +1569,420 @@ class ProfilePage extends React.Component {
                         {/* RIGHT COLUMN: DATA DETAILS */}
                         <div className={classes.rightColumn}>
 
-                            {/* NEW: Mobile Quick Actions */}
-                            {isMobile && (
-                                <MobileActions
-                                    user={user}
-                                    classes={classes}
-                                    onQrClick={this.toggleQRExpansion}
-                                    onIdClick={this.handleIdCardClick}
-                                    onViewIdClick={this.handleViewIdCard}
-                                    isIdLoading={isIdLoading}
-                                    viewIdUrl={viewIdUrl}
-                                    idToUpload={idToUpload}
-                                />
-                            )}
-
-                            {/* 3. Personal Profile & QR (Merged) */}
-                            <div className={`${classes.dataPanel} ${classes.panelOrder2}`}>
-                                <div
-                                    className={isMobile ? `${classes.accordionHeader} ${openAccordion === 'profile' ? classes.accordionHeaderOpen : ''}` : ''}
-                                    onClick={() => isMobile && this.toggleAccordion('profile')}
+                            {/* Tab Navigation */}
+                            <div className={classes.tabNavigation}>
+                                <button
+                                    className={`${classes.tab} ${activeTab === 'profile' ? classes.tabActive : ''}`}
+                                    onClick={() => this.handleTabChange('profile')}
                                 >
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                                        <h3 className={classes.panelHeader} style={{ marginBottom: isMobile ? 0 : 10 }}>Profile Details</h3>
-                                        {!isMobile && !isEditing && (
-                                            <button
-                                                className={classes.actionBtn}
-                                                onClick={this.handleEdit}
-                                                style={{ padding: '4px 12px', fontSize: '0.7rem', marginLeft: 'auto' }}
-                                            >
-                                                Edit Profile
-                                            </button>
-                                        )}
-                                    </div>
-                                </div>
-                                <div className={isMobile ? `${classes.accordionContent} ${openAccordion === 'profile' ? classes.accordionContentOpen : ''}` : ''}>
-                                    {isMobile && !isEditing && (
-                                        <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: 15 }}>
-                                            <button
-                                                className={classes.actionBtn}
-                                                onClick={this.handleEdit}
-                                                style={{ padding: '6px 14px', fontSize: '0.75rem' }}
-                                            >
-                                                Edit Profile
-                                            </button>
-                                        </div>
-                                    )}
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap-reverse', gap: 20, paddingTop: isMobile ? 0 : 15 }}>
+                                    Profile
+                                </button>
+                                <button
+                                    className={`${classes.tab} ${activeTab === 'accommodation' ? classes.tabActive : ''}`}
+                                    onClick={() => this.handleTabChange('accommodation')}
+                                >
+                                    Accommodation
+                                </button>
+                            </div>
 
-                                        {/* Info Side */}
-                                        <div style={{ flex: 1, minWidth: '200px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-                                            <div className={classes.dataGrid}>
-                                                <div className={classes.dataField}>
-                                                    <label className={classes.fieldLabel}>Phone</label>
-                                                    {isEditing ? (
-                                                        <input type="tel" name="phone" value={formData.phone} onChange={this.handleFormChange} className={classes.editInput} pattern="[0-9]{10}" />
-                                                    ) : (
-                                                        <div className={classes.fieldValue}>{user.phone}</div>
-                                                    )}
-                                                </div>
-                                                <div className={classes.dataField}>
-                                                    <label className={classes.fieldLabel}>Department</label>
-                                                    {isEditing ? (
-                                                        <input type="text" name="department" value={formData.department} onChange={this.handleFormChange} className={classes.editInput} />
-                                                    ) : (
-                                                        <div className={classes.fieldValue}>{user.department}</div>
-                                                    )}
-                                                </div>
-                                                <div className={classes.dataField}>
-                                                    <label className={classes.fieldLabel}>Year</label>
-                                                    {isEditing ? (
-                                                        <select name="year" value={formData.year} onChange={this.handleFormChange} className={`${classes.editInput} ${classes.editSelect}`}>
-                                                            <option value="">Select year</option>
-                                                            <option value="1">1st Year</option>
-                                                            <option value="2">2nd Year</option>
-                                                            <option value="3">3rd Year</option>
-                                                            <option value="4">4th Year</option>
-                                                            <option value="5">5th Year</option>
-                                                        </select>
-                                                    ) : (
-                                                        <div className={classes.fieldValue}>{user.year}</div>
-                                                    )}
-                                                </div>
-                                                <div className={classes.dataField} style={{ gridColumn: '1 / -1' }}>
-                                                    <label className={classes.fieldLabel}>College / Institution</label>
-                                                    {isEditing ? (
-                                                        <select name="college" value={formData.college} onChange={this.handleFormChange} className={`${classes.editInput} ${classes.editSelect}`}>
-                                                            <option value="">Select your college</option>
-                                                            {colleges.map((college, index) => (
-                                                                <option key={index} value={college}>{college}</option>
-                                                            ))}
-                                                        </select>
-                                                    ) : (
-                                                        <div className={classes.fieldValue} style={{ whiteSpace: 'normal', lineHeight: 1.4 }}>{user.college}</div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                            {isEditing && (
-                                                <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 15 }}>
-                                                    <button className={`${classes.actionBtn} ${classes.btnBack}`} onClick={this.handleCancelEdit} disabled={isSaving}>
-                                                        Cancel
+                            {/* Profile Tab Content */}
+                            {activeTab === 'profile' && (
+                                <>
+
+                                    {/* NEW: Mobile Quick Actions */}
+                                    {isMobile && (
+                                        <MobileActions
+                                            user={user}
+                                            classes={classes}
+                                            onQrClick={this.toggleQRExpansion}
+                                            onIdClick={this.handleIdCardClick}
+                                            onViewIdClick={this.handleViewIdCard}
+                                            isIdLoading={isIdLoading}
+                                            viewIdUrl={viewIdUrl}
+                                            idToUpload={idToUpload}
+                                        />
+                                    )}
+
+                                    {/* 3. Personal Profile & QR (Merged) */}
+                                    <div className={`${classes.dataPanel} ${classes.panelOrder2}`}>
+                                        <div
+                                            className={isMobile ? `${classes.accordionHeader} ${openAccordion === 'profile' ? classes.accordionHeaderOpen : ''}` : ''}
+                                            onClick={() => isMobile && this.toggleAccordion('profile')}
+                                        >
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                                                <h3 className={classes.panelHeader} style={{ marginBottom: isMobile ? 0 : 10 }}>Profile Details</h3>
+                                                {!isMobile && !isEditing && (
+                                                    <button
+                                                        className={classes.actionBtn}
+                                                        onClick={this.handleEdit}
+                                                        style={{ padding: '4px 12px', fontSize: '0.7rem', marginLeft: 'auto' }}
+                                                    >
+                                                        Edit Profile
                                                     </button>
-                                                    <button className={classes.actionBtn} onClick={this.handleSave} disabled={isSaving} style={{ background: '#00ff64', color: '#000', border: 'none', fontWeight: 800 }}>
-                                                        {isSaving ? 'Saving...' : 'Save Changes'}
+                                                )}
+                                            </div>
+                                        </div>
+                                        <div className={isMobile ? `${classes.accordionContent} ${openAccordion === 'profile' ? classes.accordionContentOpen : ''}` : ''}>
+                                            {isMobile && !isEditing && (
+                                                <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: 15 }}>
+                                                    <button
+                                                        className={classes.actionBtn}
+                                                        onClick={this.handleEdit}
+                                                        style={{ padding: '6px 14px', fontSize: '0.75rem' }}
+                                                    >
+                                                        Edit Profile
                                                     </button>
                                                 </div>
                                             )}
-                                        </div>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap-reverse', gap: 20, paddingTop: isMobile ? 0 : 15 }}>
 
-                                        {/* QR Side (Desktop only now) */}
-                                        {!isMobile && (
-                                            <div className={classes.qrContainer} onClick={this.toggleQRExpansion} style={{ marginTop: -15 }}>
-                                                <div className={classes.qrBox}>
-                                                    <QRCodeSVG
-                                                        value={JSON.stringify({ type: "PARTICIPANT", uniqueId: user.uniqueId })}
-                                                        size={110}
-                                                    />
+                                                {/* Info Side */}
+                                                <div style={{ flex: 1, minWidth: '200px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                                    <div className={classes.dataGrid}>
+                                                        <div className={classes.dataField}>
+                                                            <label className={classes.fieldLabel}>Phone</label>
+                                                            {isEditing ? (
+                                                                <input type="tel" name="phone" value={formData.phone} onChange={this.handleFormChange} className={classes.editInput} pattern="[0-9]{10}" />
+                                                            ) : (
+                                                                <div className={classes.fieldValue}>{user.phone}</div>
+                                                            )}
+                                                        </div>
+                                                        <div className={classes.dataField}>
+                                                            <label className={classes.fieldLabel}>Department</label>
+                                                            {isEditing ? (
+                                                                <input type="text" name="department" value={formData.department} onChange={this.handleFormChange} className={classes.editInput} />
+                                                            ) : (
+                                                                <div className={classes.fieldValue}>{user.department}</div>
+                                                            )}
+                                                        </div>
+                                                        <div className={classes.dataField}>
+                                                            <label className={classes.fieldLabel}>Year</label>
+                                                            {isEditing ? (
+                                                                <select name="year" value={formData.year} onChange={this.handleFormChange} className={`${classes.editInput} ${classes.editSelect}`}>
+                                                                    <option value="">Select year</option>
+                                                                    <option value="1">1st Year</option>
+                                                                    <option value="2">2nd Year</option>
+                                                                    <option value="3">3rd Year</option>
+                                                                    <option value="4">4th Year</option>
+                                                                    <option value="5">5th Year</option>
+                                                                </select>
+                                                            ) : (
+                                                                <div className={classes.fieldValue}>{user.year}</div>
+                                                            )}
+                                                        </div>
+                                                        <div className={classes.dataField} style={{ gridColumn: '1 / -1' }}>
+                                                            <label className={classes.fieldLabel}>College / Institution</label>
+                                                            {isEditing ? (
+                                                                <select name="college" value={formData.college} onChange={this.handleFormChange} className={`${classes.editInput} ${classes.editSelect}`}>
+                                                                    <option value="">Select your college</option>
+                                                                    {colleges.map((college, index) => (
+                                                                        <option key={index} value={college}>{college}</option>
+                                                                    ))}
+                                                                </select>
+                                                            ) : (
+                                                                <div className={classes.fieldValue} style={{ whiteSpace: 'normal', lineHeight: 1.4 }}>{user.college}</div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                    {isEditing && (
+                                                        <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 15 }}>
+                                                            <button className={`${classes.actionBtn} ${classes.btnBack}`} onClick={this.handleCancelEdit} disabled={isSaving}>
+                                                                Cancel
+                                                            </button>
+                                                            <button className={classes.actionBtn} onClick={this.handleSave} disabled={isSaving} style={{ background: '#00ff64', color: '#000', border: 'none', fontWeight: 800 }}>
+                                                                {isSaving ? 'Saving...' : 'Save Changes'}
+                                                            </button>
+                                                        </div>
+                                                    )}
                                                 </div>
-                                                <div className={classes.qrExpandHint}>
-                                                    Tap to expand
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
 
-                            {/* 4. Account & Payment Status (Moved Down) */}
-                            <div className={`${classes.dataPanel} ${classes.panelOrder3}`}>
-                                <div
-                                    className={isMobile ? `${classes.accordionHeader} ${openAccordion === 'account' ? classes.accordionHeaderOpen : ''}` : ''}
-                                    onClick={() => isMobile && this.toggleAccordion('account')}
-                                >
-                                    <h3 className={classes.panelHeader} style={{ marginBottom: isMobile ? 0 : 15 }}>Account Status</h3>
-                                </div>
-                                <div className={isMobile ? `${classes.accordionContent} ${openAccordion === 'account' ? classes.accordionContentOpen : ''}` : ''}>
-                                    <div className={classes.dataGrid} style={{ paddingTop: isMobile ? 0 : 15 }}>
-                                        <div className={classes.dataField} style={{ gridColumn: '1 / -1' }}>
-                                            <label className={classes.fieldLabel}>Email</label>
-                                            <div className={classes.fieldValue}>{user.email}</div>
-                                        </div>
-                                        {!user.isPSGStudent && (
-                                            <div className={classes.dataField}>
-                                                <label className={classes.fieldLabel}>General Fee</label>
-                                                {user.generalFeePaid ? (
-                                                    <span className={classes.statusPaid}><span>●</span> Paid</span>
-                                                ) : (
-                                                    <span className={classes.statusPending}>Pending</span>
+                                                {/* QR Side (Desktop only now) */}
+                                                {!isMobile && (
+                                                    <div className={classes.qrContainer} onClick={this.toggleQRExpansion} style={{ marginTop: -15 }}>
+                                                        <div className={classes.qrBox}>
+                                                            <QRCodeSVG
+                                                                value={JSON.stringify({ type: "PARTICIPANT", uniqueId: user.uniqueId })}
+                                                                size={110}
+                                                            />
+                                                        </div>
+                                                        <div className={classes.qrExpandHint}>
+                                                            Tap to expand
+                                                        </div>
+                                                    </div>
                                                 )}
                                             </div>
-                                        )}
-                                        <div className={classes.dataField}>
-                                            <label className={classes.fieldLabel}>Student Type</label>
-                                            <div className={classes.fieldValue}>{user.isPSGStudent ? 'PSG Student' : 'External'}</div>
-                                        </div>
-                                        <div className={classes.dataField}>
-                                            <label className={classes.fieldLabel}>Reg. Source</label>
-                                            <div className={classes.fieldValue} style={{ textTransform: 'capitalize' }}>{user.source}</div>
                                         </div>
                                     </div>
 
-                                    {/* ID Card Upload Section (Desktop only now) */}
-                                    {!isMobile && (
-                                        <div style={{ marginTop: 20, paddingTop: 15, borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
-                                                <div>
-                                                    <h3 className={classes.panelHeader} style={{ marginBottom: isMobile ? 0 : 10 }}>Identity Verification</h3>
-                                                    <div style={{ fontSize: '0.7rem', color: '#888' }}>Upload College ID (Max 10MB)</div>
-                                                    {user.idCardUploaded && !idToUpload && (
-                                                        <div style={{ color: '#00ff64', fontSize: '0.7rem', marginTop: 2 }}>✓ ID Card Uploaded</div>
-                                                    )}
+                                    {/* 4. Account & Payment Status (Moved Down) */}
+                                    <div className={`${classes.dataPanel} ${classes.panelOrder3}`}>
+                                        <div
+                                            className={isMobile ? `${classes.accordionHeader} ${openAccordion === 'account' ? classes.accordionHeaderOpen : ''}` : ''}
+                                            onClick={() => isMobile && this.toggleAccordion('account')}
+                                        >
+                                            <h3 className={classes.panelHeader} style={{ marginBottom: isMobile ? 0 : 15 }}>Account Status</h3>
+                                        </div>
+                                        <div className={isMobile ? `${classes.accordionContent} ${openAccordion === 'account' ? classes.accordionContentOpen : ''}` : ''}>
+                                            <div className={classes.dataGrid} style={{ paddingTop: isMobile ? 0 : 15 }}>
+                                                <div className={classes.dataField} style={{ gridColumn: '1 / -1' }}>
+                                                    <label className={classes.fieldLabel}>Email</label>
+                                                    <div className={classes.fieldValue}>{user.email}</div>
                                                 </div>
-                                                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                                                    {viewIdUrl && !idToUpload && (
-                                                        <button
-                                                            className={classes.actionBtn}
-                                                            onClick={this.handleViewIdCard}
-                                                            disabled={isIdLoading}
-                                                        >
-                                                            {isIdLoading ? 'Loading...' : 'View ID'}
-                                                        </button>
-                                                    )}
-                                                    {!idToUpload && (
-                                                        <button
-                                                            className={classes.actionBtn}
-                                                            onClick={this.handleIdCardClick}
-                                                            disabled={isUploadingId}
-                                                        >
-                                                            {isUploadingId ? '...' : (user.idCardUploaded ? 'Re-upload' : 'Upload')}
-                                                        </button>
-                                                    )}
+                                                {!user.isPSGStudent && (
+                                                    <div className={classes.dataField}>
+                                                        <label className={classes.fieldLabel}>General Fee</label>
+                                                        {user.generalFeePaid ? (
+                                                            <span className={classes.statusPaid}><span>●</span> Paid</span>
+                                                        ) : (
+                                                            <span className={classes.statusPending}>Pending</span>
+                                                        )}
+                                                    </div>
+                                                )}
+                                                <div className={classes.dataField}>
+                                                    <label className={classes.fieldLabel}>Student Type</label>
+                                                    <div className={classes.fieldValue}>{user.isPSGStudent ? 'PSG Student' : 'External'}</div>
+                                                </div>
+                                                <div className={classes.dataField}>
+                                                    <label className={classes.fieldLabel}>Reg. Source</label>
+                                                    <div className={classes.fieldValue} style={{ textTransform: 'capitalize' }}>{user.source}</div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
 
-                            {/* 5. Registered Events Section */}
-                            <div className={`${classes.dataPanel} ${classes.panelOrder6}`}>
-                                <div
-                                    className={isMobile ? `${classes.accordionHeader} ${openAccordion === 'events' ? classes.accordionHeaderOpen : ''}` : ''}
-                                    onClick={() => isMobile && this.toggleAccordion('events')}
-                                >
-                                    <h3 className={classes.panelHeader} style={{ marginBottom: isMobile ? 0 : 15 }}>Registered Events</h3>
-                                </div>
-                                <div className={isMobile ? `${classes.accordionContent} ${openAccordion === 'events' ? classes.accordionContentOpen : ''}` : ''}>
-                                    {registeredEvents && registeredEvents.length > 0 ? (
-                                        <div className={classes.dataGrid} style={{ paddingTop: isMobile ? 0 : 15, gridTemplateColumns: `repeat(${groupedEventCategories.length}, 1fr)` }}>
-                                            {groupedEventCategories.map(category => {
-                                                const categoryColor = categoryColors[category] || categoryColors['Other'];
-                                                return (
-                                                    <div
-                                                        key={category}
-                                                        className={classes.dataField}
+                                            {/* ID Card Upload Section (Desktop only now) */}
+                                            {!isMobile && (
+                                                <div style={{ marginTop: 20, paddingTop: 15, borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
+                                                        <div>
+                                                            <h3 className={classes.panelHeader} style={{ marginBottom: isMobile ? 0 : 10 }}>Identity Verification</h3>
+                                                            <div style={{ fontSize: '0.7rem', color: '#888' }}>Upload College ID (Max 10MB)</div>
+                                                            {user.idCardUploaded && !idToUpload && (
+                                                                <div style={{ color: '#00ff64', fontSize: '0.7rem', marginTop: 2 }}>✓ ID Card Uploaded</div>
+                                                            )}
+                                                        </div>
+                                                        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                                                            {viewIdUrl && !idToUpload && (
+                                                                <button
+                                                                    className={classes.actionBtn}
+                                                                    onClick={this.handleViewIdCard}
+                                                                    disabled={isIdLoading}
+                                                                >
+                                                                    {isIdLoading ? 'Loading...' : 'View ID'}
+                                                                </button>
+                                                            )}
+                                                            {!idToUpload && (
+                                                                <button
+                                                                    className={classes.actionBtn}
+                                                                    onClick={this.handleIdCardClick}
+                                                                    disabled={isUploadingId}
+                                                                >
+                                                                    {isUploadingId ? '...' : (user.idCardUploaded ? 'Re-upload' : 'Upload')}
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* 5. Registered Events Section */}
+                                    <div className={`${classes.dataPanel} ${classes.panelOrder6}`}>
+                                        <div
+                                            className={isMobile ? `${classes.accordionHeader} ${openAccordion === 'events' ? classes.accordionHeaderOpen : ''}` : ''}
+                                            onClick={() => isMobile && this.toggleAccordion('events')}
+                                        >
+                                            <h3 className={classes.panelHeader} style={{ marginBottom: isMobile ? 0 : 15 }}>Registered Events</h3>
+                                        </div>
+                                        <div className={isMobile ? `${classes.accordionContent} ${openAccordion === 'events' ? classes.accordionContentOpen : ''}` : ''}>
+                                            {registeredEvents && registeredEvents.length > 0 ? (
+                                                <div className={classes.dataGrid} style={{ paddingTop: isMobile ? 0 : 15, gridTemplateColumns: `repeat(${groupedEventCategories.length}, 1fr)` }}>
+                                                    {groupedEventCategories.map(category => {
+                                                        const categoryColor = categoryColors[category] || categoryColors['Other'];
+                                                        return (
+                                                            <div
+                                                                key={category}
+                                                                className={classes.dataField}
+                                                                style={{
+                                                                    display: 'flex',
+                                                                    flexDirection: 'column',
+                                                                    gap: 8,
+                                                                    borderColor: categoryColor, // Apply category color to border
+                                                                    borderWidth: 1, // Ensure border is visible
+                                                                }}
+                                                            >
+                                                                <label className={classes.fieldLabel} style={{ borderBottom: `1px solid ${categoryColor}40`, paddingBottom: 6, marginBottom: 4, color: categoryColor }}>{category}</label>
+                                                                {groupedEvents[category].map((event, index) => (
+                                                                    <div
+                                                                        key={index}
+                                                                        className={classes.fieldValue}
+                                                                        title={event.eventName || event.name}
+                                                                        style={{ fontSize: '0.8rem', whiteSpace: 'normal' }}
+                                                                    >
+                                                                        {event.eventName || event.name || 'Unnamed Event'}
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            ) : (
+                                                <div style={{ padding: '10px', color: '#888', fontStyle: 'italic', fontSize: '0.85rem', paddingTop: isMobile ? 0 : 15 }}>
+                                                    No registered events yet.
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Action Buttons */}
+                                    <div className={classes.actionButtons}>
+                                        {/* Buttons are now inside the profile details panel when editing */}
+                                    </div>
+                                </>
+                            )}
+
+                            {/* Accommodation Tab Content */}
+                            {activeTab === 'accommodation' && (
+                                <>
+                                    {/* Instructions Panel */}
+                                    <div className={classes.accommodationPanel}>
+                                        <h3 className={classes.panelHeader}>Accommodation Guidelines</h3>
+                                        <ul className={classes.instructionsList}>
+                                            {ACCOMMODATION_INSTRUCTIONS.map((instruction, index) => (
+                                                <li key={index}>{instruction}</li>
+                                            ))}
+                                        </ul>
+                                    </div>
+
+                                    {/* Registration Panel */}
+                                    <div className={classes.accommodationPanel}>
+                                        <h3 className={classes.panelHeader}>
+                                            {accommodationRegistered ? 'Registration Details' : 'Register for Accommodation'}
+                                        </h3>
+
+                                        {accommodationLoading ? (
+                                            <div style={{ padding: '20px', textAlign: 'center', color: '#888' }}>
+                                                Loading accommodation status...
+                                            </div>
+                                        ) : accommodationRegistered ? (
+                                            /* Registered View */
+                                            <div>
+                                                <div className={classes.registeredBadge}>
+                                                    <span>✓</span> Registered for Accommodation
+                                                </div>
+
+                                                <div className={classes.detailsGrid}>
+                                                    <div className={classes.detailItem}>
+                                                        <span className={classes.detailLabel}>Name</span>
+                                                        <span className={classes.detailValue}>{accommodationData?.name || user.name}</span>
+                                                    </div>
+                                                    <div className={classes.detailItem}>
+                                                        <span className={classes.detailLabel}>Email</span>
+                                                        <span className={classes.detailValue}>{accommodationData?.email || user.email}</span>
+                                                    </div>
+                                                    <div className={classes.detailItem}>
+                                                        <span className={classes.detailLabel}>College</span>
+                                                        <span className={classes.detailValue}>{accommodationData?.college || user.college}</span>
+                                                    </div>
+                                                    <div className={classes.detailItem}>
+                                                        <span className={classes.detailLabel}>Phone</span>
+                                                        <span className={classes.detailValue}>{accommodationData?.phone || user.phone}</span>
+                                                    </div>
+                                                    <div className={classes.detailItem}>
+                                                        <span className={classes.detailLabel}>Residential Address</span>
+                                                        <span className={classes.detailValue}>{accommodationData?.residentialAddress}</span>
+                                                    </div>
+                                                    <div className={classes.detailItem}>
+                                                        <span className={classes.detailLabel}>City</span>
+                                                        <span className={classes.detailValue}>{accommodationData?.city}</span>
+                                                    </div>
+                                                    <div className={classes.detailItem}>
+                                                        <span className={classes.detailLabel}>Gender</span>
+                                                        <span className={classes.detailValue} style={{ textTransform: 'capitalize' }}>{accommodationData?.gender}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            /* Registration Form */
+                                            <div className={classes.accommodationForm}>
+                                                {accommodationError && (
+                                                    <div style={{ padding: '10px', background: 'rgba(255,0,0,0.1)', border: '1px solid #ff4444', borderRadius: 8, color: '#ff6666', fontSize: '0.85rem' }}>
+                                                        {accommodationError}
+                                                    </div>
+                                                )}
+
+                                                <div className={classes.formField}>
+                                                    <label className={classes.formLabel}>Residential Address *</label>
+                                                    <textarea
+                                                        name="residentialAddress"
+                                                        value={accommodationForm.residentialAddress}
+                                                        onChange={this.handleAccommodationFormChange}
+                                                        className={classes.editInput}
+                                                        placeholder="Enter your full residential address"
+                                                        rows={3}
+                                                        style={{ resize: 'vertical', minHeight: '60px' }}
+                                                    />
+                                                </div>
+
+                                                <div className={classes.formRow}>
+                                                    <div className={classes.formField}>
+                                                        <label className={classes.formLabel}>City *</label>
+                                                        <input
+                                                            type="text"
+                                                            name="city"
+                                                            value={accommodationForm.city}
+                                                            onChange={this.handleAccommodationFormChange}
+                                                            className={classes.editInput}
+                                                            placeholder="Enter your city"
+                                                        />
+                                                    </div>
+                                                    <div className={classes.formField}>
+                                                        <label className={classes.formLabel}>Gender *</label>
+                                                        <select
+                                                            name="gender"
+                                                            value={accommodationForm.gender}
+                                                            onChange={this.handleAccommodationFormChange}
+                                                            className={`${classes.editInput} ${classes.editSelect}`}
+                                                        >
+                                                            <option value="">Select gender</option>
+                                                            <option value="male">Male</option>
+                                                            <option value="female">Female</option>
+                                                            <option value="other">Other</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <div style={{ marginTop: 10 }}>
+                                                    <button
+                                                        className={classes.actionBtn}
+                                                        onClick={this.registerAccommodation}
+                                                        disabled={accommodationSubmitting}
                                                         style={{
-                                                            display: 'flex',
-                                                            flexDirection: 'column',
-                                                            gap: 8,
-                                                            borderColor: categoryColor, // Apply category color to border
-                                                            borderWidth: 1, // Ensure border is visible
+                                                            background: accommodationSubmitting ? '#666' : '#00ff64',
+                                                            color: '#000',
+                                                            border: 'none',
+                                                            fontWeight: 800,
+                                                            padding: '12px 24px',
+                                                            fontSize: '0.85rem'
                                                         }}
                                                     >
-                                                        <label className={classes.fieldLabel} style={{ borderBottom: `1px solid ${categoryColor}40`, paddingBottom: 6, marginBottom: 4, color: categoryColor }}>{category}</label>
-                                                        {groupedEvents[category].map((event, index) => (
-                                                            <div
-                                                                key={index}
-                                                                className={classes.fieldValue}
-                                                                title={event.eventName || event.name}
-                                                                style={{ fontSize: '0.8rem', whiteSpace: 'normal' }}
-                                                            >
-                                                                {event.eventName || event.name || 'Unnamed Event'}
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                    ) : (
-                                        <div style={{ padding: '10px', color: '#888', fontStyle: 'italic', fontSize: '0.85rem', paddingTop: isMobile ? 0 : 15 }}>
-                                            No registered events yet.
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
+                                                        {accommodationSubmitting ? 'Registering...' : 'Register for Accommodation'}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </>
+                            )}
 
-                            {/* Action Buttons */}
-                            <div className={classes.actionButtons}>
-                                {/* Buttons are now inside the profile details panel when editing */}
+                            {/* Mobile-only Logout Button */}
+                            <div className={classes.mobileLogoutContainer}>
+                                <button
+                                    className={classes.mobileLogoutBtn}
+                                    onClick={this.handleLogout}
+                                >
+                                    Logout
+                                </button>
                             </div>
-                        </div>
-
-                        {/* Mobile-only Logout Button */}
-                        <div className={classes.mobileLogoutContainer}>
-                            <button
-                                className={classes.mobileLogoutBtn}
-                                onClick={this.handleLogout}
-                            >
-                                Logout
-                            </button>
                         </div>
                     </div>
 
@@ -1583,6 +2062,25 @@ class ProfilePage extends React.Component {
                             </div>
                         </div>
                     )}
+
+                    {/* ACCOMMODATION SUCCESS POPUP */}
+                    {accommodationSuccess && (
+                        <div className={classes.successOverlay} onClick={() => this.setState({ accommodationSuccess: false })}>
+                            <div className={classes.successPopup} onClick={(e) => e.stopPropagation()}>
+                                <div className={classes.successIcon}>✓</div>
+                                <div className={classes.successTitle}>Registration Successful!</div>
+                                <div className={classes.successMessage}>
+                                    You have successfully registered for accommodation. Please carry your college ID card during check-in.
+                                </div>
+                                <button
+                                    className={classes.successBtn}
+                                    onClick={() => this.setState({ accommodationSuccess: false })}
+                                >
+                                    Got it!
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </SecuenceComponent>
         );
@@ -1593,4 +2091,15 @@ ProfilePage.propTypes = {
     classes: PropTypes.any.isRequired
 };
 
-export default withStyles(styles)(ProfilePage);
+// Styled class component
+const StyledProfilePage = withStyles(styles)(ProfilePage);
+
+// Wrapper functional component to provide URL query params to the class component
+function ProfilePageWrapper(props) {
+    const searchParams = useSearchParams();
+    const initialTab = searchParams.get('tab') || 'profile';
+
+    return <StyledProfilePage {...props} initialTab={initialTab} />;
+}
+
+export default ProfilePageWrapper;

@@ -7,13 +7,18 @@ import { useSound } from '@/context/SoundContext';
 // ============================================================
 // FAQ DATA - Easy to add/remove FAQs here
 // ============================================================
-// Schema: { question: string, answer: string }
+// Schema: { question: string, answer: string | JSX }
 // Simply add or remove objects from this array to manage FAQs
+// For answers with links, use JSX: answer: <>Text <a href="url">link</a></>
 // ============================================================
 const FAQ_DATA = [
     {
         question: "What is Infinitum?",
         answer: "Infinitum 2026 is the flagship technical fest of the Computer Science and Engineering Association (CSEA), PSG College of Technology. Designed to ignite innovation and creativity, Infinitum brings together students from diverse backgrounds to compete, collaborate, and learn."
+    },
+    {
+        question: "Will accommodation be provided?",
+        answer: <>Yes, accommodation will be provided! You can register for accommodation through your profile page. <a href="/portal/profile?tab=accommodation" style={{ color: '#00d4ff', textDecoration: 'underline' }}>Click here to register</a>.</>
     },
     {
         question: "When and where is Infinitum being held?",
