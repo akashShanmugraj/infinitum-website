@@ -52,10 +52,16 @@ export function PreRegistrationProvider({ children }) {
         setIsLoading(true);
         setError('');
         try {
-            await authService.sendPreRegistrationCode(emailInput);
+            const response = await authService.sendPreRegistrationCode(emailInput);
             setEmail(emailInput);
-            setCurrentStep(PRE_REG_STEPS.VERIFY);
-            setResendCooldown(120); // Start cooldown after sending code
+
+            // Check if email is already verified (HTTP 200 with verified: true)
+            if (response.verified) {
+                setCurrentStep(PRE_REG_STEPS.SUCCESS);
+            } else {
+                setCurrentStep(PRE_REG_STEPS.VERIFY);
+                setResendCooldown(120); // Start cooldown after sending code
+            }
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to send verification code. Please try again.');
         } finally {
@@ -83,7 +89,8 @@ export function PreRegistrationProvider({ children }) {
         setIsLoading(true);
         setError('');
         try {
-            await authService.resendPreRegistrationCode(email);
+            // Use the same endpoint for resending (no separate resend endpoint)
+            await authService.sendPreRegistrationCode(email);
             setResendCooldown(120); // Reset cooldown after resend
             setError(''); // Clear any previous errors
         } catch (err) {
