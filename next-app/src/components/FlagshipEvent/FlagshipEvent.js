@@ -44,7 +44,7 @@ const EVENT_DATA = {
         { name: "Ishwarya S", mobile: "9342868277" },
         { name: "Akash S", mobile: "9943803882" },
         { name: "Sreeraghavan", mobile: "6385786223" },
-        {name: "Lohith S", mobile: "9488125100"}
+        { name: "Lohith S", mobile: "9488125100" }
     ],
     teamSize: 4,
     closed: false,
@@ -66,7 +66,7 @@ const EVENT_DATA = {
 export default function FlagshipEvent() {
     const [isOverlayOpen, setIsOverlayOpen] = useState(false);
     const [isVisible, setIsVisible] = useState(false);
-    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+    const [mousePosition, setMousePosition] = useState({ x: 0.5, y: 0.5 });
     const [isRegistered, setIsRegistered] = useState(false);
     const [notification, setNotification] = useState({
         isOpen: false,
