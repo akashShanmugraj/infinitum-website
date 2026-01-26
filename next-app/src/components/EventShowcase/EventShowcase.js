@@ -473,7 +473,7 @@ export default function EventShowcase({ sounds, initialEventId }) {
                     onConfirm: () => closeNotification(),
                     showLoginButton: true
                 });
-            } else if ((error.response?.status === 400 && msg.toLowerCase().includes("general fee"))) {
+            } else if ((error.response?.status === 400 || error.response?.status === 403) && msg.toLowerCase().includes("general fee")) {
                 setNotification({
                     isOpen: true,
                     type: 'error',
