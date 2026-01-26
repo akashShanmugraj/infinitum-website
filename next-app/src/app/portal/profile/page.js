@@ -1669,6 +1669,14 @@ class ProfilePage extends React.Component {
                                                 <div style={{ flex: 1, minWidth: '200px', display: 'flex', flexDirection: 'column', gap: 12 }}>
                                                     <div className={classes.dataGrid}>
                                                         <div className={classes.dataField}>
+                                                            <label className={classes.fieldLabel}>Full Name</label>
+                                                            {isEditing ? (
+                                                                <input type="text" name="name" value={formData.name} onChange={this.handleFormChange} className={classes.editInput} />
+                                                            ) : (
+                                                                <div className={classes.fieldValue}>{user.name}</div>
+                                                            )}
+                                                        </div>
+                                                        <div className={classes.dataField}>
                                                             <label className={classes.fieldLabel}>Phone</label>
                                                             {isEditing ? (
                                                                 <input type="tel" name="phone" value={formData.phone} onChange={this.handleFormChange} className={classes.editInput} pattern="[0-9]{10}" />
