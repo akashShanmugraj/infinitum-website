@@ -63,18 +63,134 @@ const styles = theme => ({
             background: `linear-gradient(90deg, transparent, ${theme.color.secondary.main}, transparent)`
         },
         '@media (max-width: 768px)': {
-            padding: [30, 20],
+            padding: [20, 16],
             marginBottom: 30
         }
     },
-    twoColumnLayout: {
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        gap: 25,
+    payNowSection: {
         width: '100%',
-        '@media (max-width: 968px)': {
-            gridTemplateColumns: '1fr',
-            gap: 25
+        marginBottom: 25,
+        display: 'flex',
+        justifyContent: 'center'
+    },
+    payNowButton: {
+        padding: [12, 24],
+        background: 'transparent',
+        clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)',
+        border: `2px solid ${theme.color.secondary.main}`,
+        color: '#fff',
+        fontFamily: theme.typography.primary,
+        fontSize: '14px',
+        fontWeight: 400,
+        textTransform: 'uppercase',
+        letterSpacing: 0,
+        cursor: 'pointer',
+        transition: 'all 0.3s ease',
+        textShadow: `0 0 5px ${theme.color.secondary.main}`,
+        minWidth: '120px',
+        '&:hover': {
+            backgroundColor: theme.color.secondary.main,
+            color: '#ffffff'
+        },
+        '@media (max-width: 768px)': {
+            fontSize: '14px',
+            padding: [12, 24]
+        }
+    },
+    paymentInstructionsOverlay: {
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: 'rgba(0, 0, 0, 0.9)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 10000,
+        padding: 20
+    },
+    paymentInstructionsModal: {
+        background: `linear-gradient(135deg, rgba(199, 32, 113, 0.08) 0%, rgba(0, 0, 0, 0.6) 100%)`,
+        border: `1px solid rgba(199, 32, 113, 0.3)`,
+        borderRadius: 12,
+        maxWidth: 700,
+        width: '100%',
+        maxHeight: '90vh',
+        overflow: 'auto',
+        padding: 30,
+        position: 'relative',
+        '@media (max-width: 768px)': {
+            padding: 20
+        }
+    },
+    messageOverlay: {
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: 'rgba(0, 0, 0, 0.9)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 10000,
+        padding: 20
+    },
+    messageModal: {
+        background: `linear-gradient(135deg, rgba(199, 32, 113, 0.08) 0%, rgba(0, 0, 0, 0.6) 100%)`,
+        border: `1px solid rgba(199, 32, 113, 0.3)`,
+        borderRadius: 12,
+        maxWidth: 500,
+        width: '100%',
+        padding: 30,
+        position: 'relative',
+        '@media (max-width: 768px)': {
+            padding: 20
+        }
+    },
+    messageContent: {
+        padding: [20, 0],
+        display: 'flex',
+        alignItems: 'center',
+        gap: 15,
+        fontSize: '1rem',
+        fontFamily: theme.typography.secondary,
+        color: '#fff',
+        '& i': {
+            fontSize: '2rem'
+        }
+    },
+    messageContentError: {
+        color: '#ff6666',
+        '& i': {
+            color: '#ff6666'
+        }
+    },
+    messageContentSuccess: {
+        color: '#00ff64',
+        '& i': {
+            color: '#00ff64'
+        }
+    },
+    messageButton: {
+        marginTop: 20,
+        width: '100%',
+        padding: [12, 24],
+        background: `linear-gradient(135deg, ${theme.color.secondary.main}, ${theme.color.secondary.dark})`,
+        border: 'none',
+        borderRadius: 6,
+        color: '#fff',
+        fontFamily: theme.typography.primary,
+        fontSize: '0.9rem',
+        fontWeight: 600,
+        textTransform: 'uppercase',
+        letterSpacing: 0.5,
+        cursor: 'pointer',
+        transition: 'all 0.3s ease',
+        '&:hover': {
+            transform: 'scale(1.02)',
+            boxShadow: `0 0 15px ${theme.color.secondary.main}60`
         }
     },
     sectionTitle: {
@@ -549,6 +665,7 @@ class FeePaymentPage extends React.Component {
     state = {
         user: null,
         loading: true,
+        showPaymentInstructions: false,
         instructionsRead: false,
         receipts: [],
         selectedType: 'STUDENT',
@@ -561,7 +678,8 @@ class FeePaymentPage extends React.Component {
         showPreview: false,
         isReceiptViewerOpen: false,
         receiptViewerUrl: null,
-        receiptViewerType: null
+        receiptViewerType: null,
+        showMessageOverlay: false
     };
 
     componentDidMount() {
@@ -572,7 +690,21 @@ class FeePaymentPage extends React.Component {
     fetchUserData = async () => {
         try {
             const response = await authService.getProfile();
-            this.setState({ user: response.user, loading: false });
+            const user = response.user;
+
+            // Set default selectedType based on payment status
+            let defaultType = 'STUDENT';
+            if (user.generalFeePaid && !user.workshopFeePaid) {
+                defaultType = 'WORKSHOP';
+            } else if (!user.generalFeePaid) {
+                defaultType = 'STUDENT';
+            }
+
+            this.setState({
+                user,
+                loading: false,
+                selectedType: defaultType
+            });
         } catch (error) {
             console.error('Failed to fetch user profile:', error);
             window.location.href = '/auth?type=login';
@@ -588,10 +720,19 @@ class FeePaymentPage extends React.Component {
         }
     };
 
-    handlePayNow = () => {
+    handlePayNowClick = () => {
+        this.setState({ showPaymentInstructions: true, instructionsRead: false });
+    };
+
+    handleCloseInstructions = () => {
+        this.setState({ showPaymentInstructions: false, instructionsRead: false });
+    };
+
+    handleProceedToPayment = () => {
         const paymentUrl = process.env.NEXT_PUBLIC_PAYMENT_URL;
         if (paymentUrl) {
             window.open(paymentUrl, '_blank');
+            this.setState({ showPaymentInstructions: false });
         } else {
             console.error('Payment URL not configured');
         }
@@ -657,7 +798,8 @@ class FeePaymentPage extends React.Component {
 
             this.setState({
                 uploadError: errorMessage,
-                uploadSuccess: false
+                uploadSuccess: false,
+                showMessageOverlay: true
             });
         } finally {
             this.setState({ uploading: false });
@@ -782,7 +924,8 @@ class FeePaymentPage extends React.Component {
             this.setState({
                 uploadError: errorMessage,
                 uploadSuccess: false,
-                showPreview: false
+                showPreview: false,
+                showMessageOverlay: true
             });
         } finally {
             this.setState({ uploading: false });
@@ -808,164 +951,208 @@ class FeePaymentPage extends React.Component {
                             </div>
                         ) : (
                             <>
-                                {/* Two Column Layout for Desktop */}
-                                <div className={classes.twoColumnLayout}>
-                                    {/* Left Column: Payment Instructions */}
-                                    <div className={classes.section}>
-                                        <Text className={classes.sectionTitle}>Payment Instructions</Text>
-                                        <ul className={classes.instructionsList}>
-                                            <li><strong>Mobile Number Match:</strong> Ensure the mobile number entered in the payment gateway matches your registered mobile number on this website.</li>
-                                            <li><strong>Strict Policy:</strong> Duplicate receipts or malpractice will lead to severe disciplinary actions.</li>
-                                            <li><strong>Workshop Fee:</strong> ₹350 per workshop. A participant can attend only ONE workshop.</li>
-                                            <li><strong>General/Student Fee:</strong> ₹150. Allows participation in multiple events and paper presentations.</li>
-                                            <li><strong>No Refunds:</strong> All payments are non-refundable. Select your category carefully.</li>
-                                            <li><strong>Receipt Upload:</strong> You must upload the payment receipt here to unlock event/workshop registrations.</li>
-                                            <li><strong>PSG Students:</strong> Students from PSG Tech and PSG iTech are <strong>exempt</strong> from the General Fee.</li>
-                                        </ul>
+                                {/* Pay Now Button - Top Center */}
+                                <div className={classes.payNowSection}>
+                                    <button
+                                        onClick={this.handlePayNowClick}
+                                        className={classes.payNowButton}
+                                    >
+                                        Pay Now
+                                    </button>
+                                </div>
 
-                                        <div className={classes.checkboxContainer}>
-                                            <input
-                                                type="checkbox"
-                                                id="instructionsRead"
-                                                checked={instructionsRead}
-                                                onChange={(e) => this.setState({ instructionsRead: e.target.checked })}
-                                                className={classes.checkbox}
-                                            />
-                                            <label htmlFor="instructionsRead" className={classes.checkboxLabel}>
-                                                I have read and understood the payment instructions
+                                {/* Receipt Upload Section */}
+                                <div className={classes.section}>
+                                    <Text className={classes.sectionTitle}>Already Paid? Upload Receipt</Text>
+
+                                    <div className={classes.formField}>
+                                        <label className={classes.formLabel}>Receipt Type *</label>
+                                        <div className={classes.radioGroup}>
+                                            <label className={`${classes.radioLabel} ${selectedType === 'STUDENT' ? classes.radioLabelActive : ''} ${(user?.generalFeePaid && user?.workshopFeePaid) || user?.generalFeePaid ? classes.radioLabelDisabled : ''}`}>
+                                                <input
+                                                    type="radio"
+                                                    name="receiptType"
+                                                    value="STUDENT"
+                                                    checked={selectedType === 'STUDENT'}
+                                                    onChange={(e) => this.setState({ selectedType: e.target.value })}
+                                                    className={classes.radioInput}
+                                                    disabled={user?.generalFeePaid && user?.workshopFeePaid || user?.generalFeePaid}
+                                                />
+                                                <span className={classes.radioText}>
+                                                    General Fee
+                                                    {user?.generalFeePaid && (
+                                                        <span style={{ marginLeft: 8, color: '#00ff64', fontSize: '0.85rem' }}>
+                                                            <i className="ri-check-line"></i> Paid
+                                                        </span>
+                                                    )}
+                                                </span>
+                                            </label>
+                                            <label className={`${classes.radioLabel} ${selectedType === 'WORKSHOP' ? classes.radioLabelActive : ''} ${(user?.generalFeePaid && user?.workshopFeePaid) || user?.workshopFeePaid ? classes.radioLabelDisabled : ''}`}>
+                                                <input
+                                                    type="radio"
+                                                    name="receiptType"
+                                                    value="WORKSHOP"
+                                                    checked={selectedType === 'WORKSHOP'}
+                                                    onChange={(e) => this.setState({ selectedType: e.target.value })}
+                                                    className={classes.radioInput}
+                                                    disabled={user?.generalFeePaid && user?.workshopFeePaid || user?.workshopFeePaid}
+                                                />
+                                                <span className={classes.radioText}>
+                                                    Workshop Fee
+                                                    {user?.workshopFeePaid && (
+                                                        <span style={{ marginLeft: 8, color: '#00ff64', fontSize: '0.85rem' }}>
+                                                            <i className="ri-check-line"></i> Paid
+                                                        </span>
+                                                    )}
+                                                </span>
                                             </label>
                                         </div>
+                                    </div>
 
-                                        <button
-                                            onClick={this.handlePayNow}
-                                            disabled={!instructionsRead}
-                                            className={`${classes.actionBtn} ${!instructionsRead ? classes.disabled : ''}`}
+                                    <div className={classes.formField}>
+                                        <label className={classes.formLabel}>Upload Receipt (PDF, JPG, PNG, WebP - Max 10MB)</label>
+                                        <label
+                                            htmlFor="receiptUpload"
+                                            className={classes.uploadButton}
+                                            style={{
+                                                opacity: (user?.generalFeePaid && user?.workshopFeePaid) ? 0.4 : 1,
+                                                cursor: (user?.generalFeePaid && user?.workshopFeePaid) ? 'not-allowed' : 'pointer'
+                                            }}
                                         >
-                                            Proceed to Payment
-                                        </button>
+                                            Choose File
+                                        </label>
+                                        <input
+                                            id="receiptUpload"
+                                            type="file"
+                                            accept=".pdf,.jpg,.jpeg,.png,.webp"
+                                            onChange={this.handleFileSelect}
+                                            className={classes.fileInput}
+                                            disabled={user?.generalFeePaid && user?.workshopFeePaid}
+                                        />
                                     </div>
 
-                                    {/* Right Column: Receipt Upload */}
-                                    <div className={classes.section}>
-                                        <Text className={classes.sectionTitle}>Already Paid? Upload Receipt</Text>
-
-                                        <div className={classes.formField}>
-                                            <label className={classes.formLabel}>Receipt Type *</label>
-                                            <div className={classes.radioGroup}>
-                                                <label className={`${classes.radioLabel} ${selectedType === 'STUDENT' ? classes.radioLabelActive : ''} ${user?.generalFeePaid ? classes.radioLabelDisabled : ''}`}>
-                                                    <input
-                                                        type="radio"
-                                                        name="receiptType"
-                                                        value="STUDENT"
-                                                        checked={selectedType === 'STUDENT'}
-                                                        onChange={(e) => this.setState({ selectedType: e.target.value })}
-                                                        className={classes.radioInput}
-                                                        disabled={user?.generalFeePaid}
-                                                    />
-                                                    <span className={classes.radioText}>
-                                                        General Fee
-                                                        {user?.generalFeePaid && (
-                                                            <span style={{ marginLeft: 8, color: '#00ff64', fontSize: '0.85rem' }}>
-                                                                <i className="ri-check-line"></i> Paid
+                                    {receipts.length > 0 && (
+                                        <>
+                                            <Text className={classes.sectionTitle} style={{ marginTop: 40, fontSize: '1.3rem' }}>
+                                                Your Uploaded Receipts
+                                            </Text>
+                                            <div className={classes.receiptsGrid}>
+                                                {receipts.map((receipt, index) => (
+                                                    <div key={index} className={classes.receiptCard}>
+                                                        <button
+                                                            onClick={() => this.handleViewReceipt(receipt)}
+                                                            className={classes.receiptLink}
+                                                            style={{ background: 'none', border: 'none', cursor: 'pointer', width: '100%', textAlign: 'left' }}
+                                                        >
+                                                            <i className="ri-file-line"></i>
+                                                            {receipt.fileName.split('/').pop()}
+                                                        </button>
+                                                        <div className={classes.receiptMeta}>
+                                                            <span className={`${classes.badge} ${receipt.type === 'STUDENT' ? classes.typeBadgeStudent : classes.typeBadgeWorkshop}`}>
+                                                                {receipt.type}
                                                             </span>
-                                                        )}
-                                                    </span>
-                                                </label>
-                                                <label className={`${classes.radioLabel} ${selectedType === 'WORKSHOP' ? classes.radioLabelActive : ''} ${user?.workshopFeePaid ? classes.radioLabelDisabled : ''}`}>
-                                                    <input
-                                                        type="radio"
-                                                        name="receiptType"
-                                                        value="WORKSHOP"
-                                                        checked={selectedType === 'WORKSHOP'}
-                                                        onChange={(e) => this.setState({ selectedType: e.target.value })}
-                                                        className={classes.radioInput}
-                                                        disabled={user?.workshopFeePaid}
-                                                    />
-                                                    <span className={classes.radioText}>
-                                                        Workshop Fee
-                                                        {user?.workshopFeePaid && (
-                                                            <span style={{ marginLeft: 8, color: '#00ff64', fontSize: '0.85rem' }}>
-                                                                <i className="ri-check-line"></i> Paid
+                                                            <span className={`${classes.badge} ${classes.verifiedBadge} ${receipt.verified ? classes.verifiedBadgeVerified : classes.verifiedBadgePending}`}>
+                                                                {receipt.verified ? (
+                                                                    <><i className="ri-check-line"></i> Verified</>
+                                                                ) : (
+                                                                    <><i className="ri-time-line"></i> Pending</>
+                                                                )}
                                                             </span>
-                                                        )}
-                                                    </span>
-                                                </label>
-                                            </div>
-                                        </div>
-
-                                        <div className={classes.formField}>
-                                            <label className={classes.formLabel}>Upload Receipt (PDF, JPG, PNG, WebP - Max 10MB)</label>
-                                            <label htmlFor="receiptUpload" className={classes.uploadButton}>
-                                                Choose File
-                                            </label>
-                                            <input
-                                                id="receiptUpload"
-                                                type="file"
-                                                accept=".pdf,.jpg,.jpeg,.png,.webp"
-                                                onChange={this.handleFileSelect}
-                                                className={classes.fileInput}
-                                            />
-                                        </div>
-
-                                        {uploadError && (
-                                            <div className={`${classes.message} ${classes.errorMessage}`}>
-                                                <i className="ri-error-warning-line"></i> {uploadError}
-                                            </div>
-                                        )}
-
-                                        {uploadSuccess && (
-                                            <div className={`${classes.message} ${classes.successMessage}`}>
-                                                <i className="ri-check-line"></i> {this.state.uploadSuccessMessage || 'Receipt uploaded successfully!'}
-                                            </div>
-                                        )}
-
-                                        {receipts.length > 0 && (
-                                            <>
-                                                <Text className={classes.sectionTitle} style={{ marginTop: 40, fontSize: '1.3rem' }}>
-                                                    Your Uploaded Receipts
-                                                </Text>
-                                                <div className={classes.receiptsGrid}>
-                                                    {receipts.map((receipt, index) => (
-                                                        <div key={index} className={classes.receiptCard}>
-                                                            <button
-                                                                onClick={() => this.handleViewReceipt(receipt)}
-                                                                className={classes.receiptLink}
-                                                                style={{ background: 'none', border: 'none', cursor: 'pointer', width: '100%', textAlign: 'left' }}
-                                                            >
-                                                                <i className="ri-file-line"></i>
-                                                                {receipt.fileName.split('/').pop()}
-                                                            </button>
-                                                            <div className={classes.receiptMeta}>
-                                                                <span className={`${classes.badge} ${receipt.type === 'STUDENT' ? classes.typeBadgeStudent : classes.typeBadgeWorkshop}`}>
-                                                                    {receipt.type}
-                                                                </span>
-                                                                <span className={`${classes.badge} ${classes.verifiedBadge} ${receipt.verified ? classes.verifiedBadgeVerified : classes.verifiedBadgePending}`}>
-                                                                    {receipt.verified ? (
-                                                                        <><i className="ri-check-line"></i> Verified</>
-                                                                    ) : (
-                                                                        <><i className="ri-time-line"></i> Pending</>
-                                                                    )}
-                                                                </span>
-                                                            </div>
-                                                            {receipt.verified && receipt.name && (
-                                                                <div className={classes.receiptDetails}>
-                                                                    <div><span className={classes.detailLabel}>Name:</span> {receipt.name}</div>
-                                                                    {receipt.receiptNumber && (
-                                                                        <div><span className={classes.detailLabel}>Receipt #:</span> {receipt.receiptNumber}</div>
-                                                                    )}
-                                                                </div>
-                                                            )}
                                                         </div>
-                                                    ))}
-                                                </div>
-                                            </>
-                                        )}
-                                    </div>
+                                                        {receipt.verified && receipt.name && (
+                                                            <div className={classes.receiptDetails}>
+                                                                <div><span className={classes.detailLabel}>Name:</span> {receipt.name}</div>
+                                                                {receipt.receiptNumber && (
+                                                                    <div><span className={classes.detailLabel}>Receipt #:</span> {receipt.receiptNumber}</div>
+                                                                )}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
                             </>
                         )}
                     </div>
                 </Secuence>
+
+                {/* Payment Instructions Overlay */}
+                {this.state.showPaymentInstructions && (
+                    <div className={classes.paymentInstructionsOverlay} onClick={this.handleCloseInstructions}>
+                        <div className={classes.paymentInstructionsModal} onClick={(e) => e.stopPropagation()}>
+                            <div className={classes.previewHeader}>
+                                <div className={classes.previewTitle}>Payment Instructions</div>
+                                <button className={classes.closeButton} onClick={this.handleCloseInstructions}>
+                                    <i className="ri-close-line"></i>
+                                </button>
+                            </div>
+
+                            <ul className={classes.instructionsList} style={{ margin: '20px 0' }}>
+                                <li><strong>Mobile Number Match:</strong> Ensure the mobile number entered in the payment gateway matches your registered mobile number on this website.</li>
+                                <li><strong>Strict Policy:</strong> Duplicate receipts or malpractice will lead to severe disciplinary actions.</li>
+                                <li><strong>Workshop Fee:</strong> ₹350 per workshop. A participant can attend only ONE workshop.</li>
+                                <li><strong>General/Student Fee:</strong> ₹150. Allows participation in multiple events and paper presentations.</li>
+                                <li><strong>No Refunds:</strong> All payments are non-refundable. Select your category carefully.</li>
+                                <li><strong>Receipt Upload:</strong> You must upload the payment receipt here to unlock event/workshop registrations.</li>
+                                <li><strong>PSG Students:</strong> Students from PSG Tech and PSG iTech are <strong>exempt</strong> from the General Fee.</li>
+                            </ul>
+
+                            <div className={classes.checkboxContainer}>
+                                <input
+                                    type="checkbox"
+                                    id="instructionsReadModal"
+                                    checked={this.state.instructionsRead}
+                                    onChange={(e) => this.setState({ instructionsRead: e.target.checked })}
+                                    className={classes.checkbox}
+                                />
+                                <label htmlFor="instructionsReadModal" className={classes.checkboxLabel}>
+                                    I have read and understood the payment instructions
+                                </label>
+                            </div>
+
+                            <button
+                                onClick={this.handleProceedToPayment}
+                                disabled={!this.state.instructionsRead}
+                                className={`${classes.actionBtn} ${!this.state.instructionsRead ? classes.disabled : ''}`}
+                                style={{ marginTop: 20 }}
+                            >
+                                Proceed to Pay
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* Message Overlay for Upload Status */}
+                {this.state.showMessageOverlay && (
+                    <div className={classes.messageOverlay} onClick={() => this.setState({ showMessageOverlay: false, uploadError: null, uploadSuccess: false })}>
+                        <div className={classes.messageModal} onClick={(e) => e.stopPropagation()}>
+                            <div className={classes.previewHeader}>
+                                <div className={classes.previewTitle}>
+                                    {this.state.uploadError ? 'Upload Failed' : 'Upload Successful'}
+                                </div>
+                                <button className={classes.closeButton} onClick={() => this.setState({ showMessageOverlay: false, uploadError: null, uploadSuccess: false })}>
+                                    <i className="ri-close-line"></i>
+                                </button>
+                            </div>
+
+                            <div className={`${classes.messageContent} ${this.state.uploadError ? classes.messageContentError : classes.messageContentSuccess}`}>
+                                <i className={this.state.uploadError ? "ri-error-warning-line" : "ri-check-line"}></i>
+                                <span>
+                                    {this.state.uploadError || this.state.uploadSuccessMessage || 'Receipt uploaded successfully!'}
+                                </span>
+                            </div>
+
+                            <button
+                                onClick={() => this.setState({ showMessageOverlay: false, uploadError: null, uploadSuccess: false })}
+                                className={classes.messageButton}
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                )}
 
                 {/* Preview Modal Overlay */}
                 {this.state.showPreview && this.state.selectedFile && (

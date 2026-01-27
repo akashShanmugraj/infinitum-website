@@ -114,14 +114,14 @@ export const eventService = {
     // Get workshops registered by the logged-in user
     getUserWorkshops: async () => {
         const response = await api.get('/api/events/workshops/registrations');
-        console.log(response.data);
+        //console.log(response.data);
         return response.data;
     },
 
     // Get papers registered by the logged-in user
     getUserPapers: async () => {
         const response = await api.get('/api/events/papers/registrations');
-        console.log(response.data);
+        //console.log(response.data);
         return response.data;
         
     }

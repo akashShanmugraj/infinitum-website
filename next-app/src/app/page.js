@@ -221,7 +221,7 @@ function HomePage() {
     if (ref) {
       // Save referral code to localStorage
       localStorage.setItem('club_referral_code', ref);
-      console.log('Referral code captured on homepage:', ref);
+      //console.log('Referral code captured on homepage:', ref);
       
       // Remove the 'ref' query parameter from URL without page reload
       const newUrl = new URL(window.location.href);
