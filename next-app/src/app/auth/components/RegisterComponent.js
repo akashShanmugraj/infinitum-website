@@ -62,6 +62,30 @@ export default function RegisterComponent() {
         }));
     }, [source, router]);
 
+    // Check if email is from a PSG college
+    const isPSGEmail = () => {
+        const emailLower = formData.email.toLowerCase();
+        return Object.values(PSG_COLLEGES).some(domain => emailLower.endsWith(domain));
+    };
+
+    // Auto-select college based on email domain
+    useEffect(() => {
+        if (!formData.email) return;
+
+        const emailLower = formData.email.toLowerCase();
+
+        // Find matching college based on email domain
+        for (const [collegeName, emailDomain] of Object.entries(PSG_COLLEGES)) {
+            if (emailLower.endsWith(emailDomain)) {
+                setFormData(prev => ({
+                    ...prev,
+                    college: collegeName
+                }));
+                break;
+            }
+        }
+    }, [formData.email]);
+
     // Check if the selected college is a PSG college and validate email domain
     const validatePSGEmail = () => {
         const selectedCollege = formData.college;
@@ -297,6 +321,8 @@ export default function RegisterComponent() {
                                     value={formData.college}
                                     onChange={handleChange}
                                     required
+                                    disabled={isPSGEmail()}
+                                    className={isPSGEmail() ? 'readonly-input' : ''}
                                 >
                                     <option value="">Select your college</option>
                                     {colleges.map((college, index) => (
