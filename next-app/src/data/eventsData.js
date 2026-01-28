@@ -443,14 +443,29 @@ export const papersData = [
         "theme": "Artificial Intelligence",
         "tagline": "Explore the Future of AI and ML",
         "topic": "Recent advances in deep learning, neural networks, and AI applications in real-world scenarios",
-        "rules": "Each team can have a maximum of 4 members. Papers must be original, unpublished, and strictly follow IEEE format (max 2 pages).\nAbstract must be submitted in PDF before deadline. Plagiarism should not exceed 15–20%. Selected papers notified via email.\n15 mins presentation + 5 mins Q&A in PPT/PDF. Participants must report 30 mins before scheduled time.\nProject implementation is added credit; prototypes welcome. Judges’ decision is final.",
+        "themes": [
+            "AI-Based Intelligent Decision Support Systems",
+            "Deep Learning Techniques for Pattern Recognition",
+            "AI in Healthcare Diagnosis and Prediction",
+            "Computer Vision Applications Using Deep Learning",
+            "Generative AI and Large Language Models",
+            "AI for Cybersecurity and Threat Detection",
+            "AI for Internet of Things (AIoT)"
+        ],
+        "rules": "Each team can have a maximum of 4 members.\nPapers must be original and not previously published. The paper should strictly follow the IEEE format.\nMaximum 2 pages in IEEE format (including references).\nAbstract paper must be submitted in PDF format before the deadline. Selected papers will be intimated via email.\nPlagiarism should not exceed 15–20% (excluding references).\nEach team will be given 15 minutes to present their ideas, followed by a 5-minute question-and-answer session.\nPresentation must be in PPT / PDF format.\nParticipants must report at least 30 minutes before their scheduled time.\nSubmission of projects (implementation of ideas) will be considered as an added credit. A working prototype or demonstration is not mandatory, but if available, teams are encouraged to showcase it during the presentation to strengthen their work.\nThe judges' decision will be final, and no correspondence will be entertained.",
         "date": {
             "$date": "2026-02-14T09:00:00.000Z"
         },
         "time": "10:00 AM - 12:30 PM",
         "dateAndTime": "Feb 14, 10:00 AM - 12:30 PM",
+        "abstractDeadline": {
+            "$date": "2026-02-06T23:59:59.000Z"
+        },
+        "paperDeadline": {
+            "$date": "2026-02-11T23:59:59.000Z"
+        },
         "deadline": {
-            "$date": "2026-02-01T00:00:00.000Z"
+            "$date": "2026-02-06T00:00:00.000Z"
         },
         "teamSize": "1 to 4",
         "hall": "Department Seminar Hall - CSE",
