@@ -746,9 +746,9 @@ class FeePaymentPage extends React.Component {
         const file = event.target.files[0];
         if (!file) return;
 
-        const validTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+        const validTypes = ['application/pdf'];
         if (!validTypes.includes(file.type)) {
-            this.setState({ uploadError: 'Invalid file format. Please upload a PDF, JPEG, PNG, or WebP file.' });
+            this.setState({ uploadError: 'Invalid file format. Please upload a PDF file only.' });
             return;
         }
 
@@ -822,10 +822,10 @@ class FeePaymentPage extends React.Component {
             return;
         }
 
-        const validTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+        const validTypes = ['application/pdf'];
         if (!validTypes.includes(file.type)) {
             this.setState({
-                uploadError: 'Invalid file format. Please upload a PDF, JPEG, PNG, or WebP file.',
+                uploadError: 'Invalid file format. Please upload a PDF file only.',
                 selectedFile: null,
                 previewUrl: null
             });
@@ -1017,7 +1017,7 @@ class FeePaymentPage extends React.Component {
                                     </div>
 
                                     <div className={classes.formField}>
-                                        <label className={classes.formLabel}>Upload Receipt (PDF, JPG, PNG, WebP - Max 10MB)</label>
+                                        <label className={classes.formLabel}>Upload Receipt (PDF Only - Max 10MB)</label>
                                         <label
                                             htmlFor="receiptUpload"
                                             className={classes.uploadButton}
@@ -1031,7 +1031,7 @@ class FeePaymentPage extends React.Component {
                                         <input
                                             id="receiptUpload"
                                             type="file"
-                                            accept=".pdf,.jpg,.jpeg,.png,.webp"
+                                            accept=".pdf"
                                             onChange={this.handleFileSelect}
                                             className={classes.fileInput}
                                             disabled={user?.generalFeePaid && user?.workshopFeePaid}
