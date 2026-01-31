@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState, Suspense, useRef } from 'react';
+import React, { useEffect, useState, Suspense, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import './payment.css';
 import { paymentService } from '@/services/paymentService';
@@ -15,48 +15,64 @@ function PaymentPageContent() {
     const [eventId, setEventId] = useState(null);
     const [error, setError] = useState(null);
     const [showAnimation, setShowAnimation] = useState(false);
+    const [isRefreshing, setIsRefreshing] = useState(false);
 
-    useEffect(() => {
-        const verifyPayment = async () => {
-            if (!code) {
-                setError('No payment code provided');
-                setLoading(false);
+    const verifyPayment = useCallback(async (isRefresh = false) => {
+        if (!code) {
+            setError('No payment code provided');
+            setLoading(false);
+            setTimeout(() => {
+                setShowAnimation(true);
+            }, 100);
+            return;
+        }
+
+        if (isRefresh) {
+            setIsRefreshing(true);
+            setShowAnimation(false);
+        }
+
+        try {
+            const data = await paymentService.verifyCode(code);
+
+            if (data.success) {
+                setSuccess(true);
+                setEventId(data.eventId);
+                setError(null);
                 setTimeout(() => {
                     setShowAnimation(true);
                 }, 100);
-                return;
-            }
-
-            try {
-                const data = await paymentService.verifyCode(code);
-
-                if (data.success) {
-                    setSuccess(true);
-                    setEventId(data.eventId);
-                    setTimeout(() => {
-                        setShowAnimation(true);
-                    }, 100);
-                } else {
-                    setError(data.error || 'Failed to verify payment');
-                    setSuccess(false);
-                    setTimeout(() => {
-                        setShowAnimation(true);
-                    }, 100);
-                }
-            } catch (err) {
-                console.error('Error verifying payment:', err);
-                setError(err.response?.data?.error || 'Failed to verify payment');
+            } else {
+                setError(data.error || 'Failed to verify payment');
                 setSuccess(false);
                 setTimeout(() => {
                     setShowAnimation(true);
                 }, 100);
-            } finally {
-                setLoading(false);
             }
-        };
-
-        verifyPayment();
+        } catch (err) {
+            console.error('Error verifying payment:', err);
+            setError(err.response?.data?.error || 'Failed to verify payment');
+            setSuccess(false);
+            setTimeout(() => {
+                setShowAnimation(true);
+            }, 100);
+        } finally {
+            setLoading(false);
+            setIsRefreshing(false);
+        }
     }, [code]);
+
+    useEffect(() => {
+        verifyPayment(false);
+    }, [verifyPayment]);
+
+    const handleRefreshStatus = () => {
+        // Track button click with Umami analytics
+        if (typeof window !== 'undefined' && window.umami) {
+            window.umami.track('payment-refresh-status-click');
+        }
+        verifyPayment(true);
+    };
 
     const handleProceed = () => {
         if (eventId === '-1' || !eventId) {
@@ -99,6 +115,27 @@ function PaymentPageContent() {
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '24px' }}>
                         <button
+                            className="payment-btn payment-btn-secondary"
+                            onClick={handleRefreshStatus}
+                            disabled={isRefreshing}
+                            style={{ textAlign: 'center' }}
+                            data-umami-event="payment-refresh-status-click"
+                        >
+                            {isRefreshing ? (
+                                <span className="payment-btn-loading">
+                                    <span className="payment-btn-spinner"></span>
+                                    Checking...
+                                </span>
+                            ) : (
+                                <span className="payment-btn-content">
+                                    <svg className="payment-refresh-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                    </svg>
+                                    Refresh Payment Status
+                                </span>
+                            )}
+                        </button>
+                        <button
                             className="payment-btn"
                             onClick={handleProceed}
                             style={{ textAlign: 'center' }}
@@ -133,6 +170,27 @@ function PaymentPageContent() {
                         style={{ textAlign: 'center' }}
                     >
                         Proceed for event registration
+                    </button>
+                    <button
+                        className="payment-btn payment-btn-secondary"
+                        onClick={handleRefreshStatus}
+                        disabled={isRefreshing}
+                        style={{ textAlign: 'center' }}
+                        data-umami-event="payment-refresh-status-click"
+                    >
+                        {isRefreshing ? (
+                            <span className="payment-btn-loading">
+                                <span className="payment-btn-spinner"></span>
+                                Checking...
+                            </span>
+                        ) : (
+                            <span className="payment-btn-content">
+                                <svg className="payment-refresh-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                </svg>
+                                Refresh Payment Status
+                            </span>
+                        )}
                     </button>
                 </div>
             </div>
